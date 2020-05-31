@@ -1,7 +1,7 @@
 #include "State.hpp"
 
-State::State(sf::RenderWindow* window, std::stack<State*>* states)
-	: window(window),states(states)
+State::State(sf::RenderWindow* window, std::stack<State*>* states, std::map<std::string, int>* supportedKeys)
+	: window(window),states(states),supportedKeys(supportedKeys)
 {
 	active = true;
 }
@@ -15,7 +15,7 @@ const bool& State::isActive() const
 	return active;
 }
 
-void State::updateMousePosition()
+void State::updateInput()
 {
 	mousePosScreen = sf::Mouse::getPosition();
 	mousePosWindow = sf::Mouse::getPosition(*window);

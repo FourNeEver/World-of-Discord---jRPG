@@ -10,7 +10,8 @@ protected:
 	
 	sf::RenderWindow* window;
 	std::stack<State*>* states;
-	
+	std::map<std::string, int>* supportedKeys;
+	std::map<std::string, int> keybinds;
 
 	bool active;
 
@@ -24,14 +25,14 @@ protected:
 	//Functions
 
 public:
-	State(sf::RenderWindow* window, std::stack<State*>* states);
+	State(sf::RenderWindow* window, std::stack<State*>* states, std::map<std::string, int>* supportedKeys);
 	virtual ~State();
 
 	const bool& isActive() const;
 
 	void exit();
 
-	void updateMousePosition();
+	void updateInput();
 	
 	virtual void update(const float& dt) = 0;
 	virtual void render(sf::RenderTarget* target = nullptr) = 0;

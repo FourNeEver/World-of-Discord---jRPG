@@ -4,6 +4,20 @@
 
 void MainMenuState::initialize()
 {
+
+	std::ifstream ifs("Config/mainmenustate_keybinds.ini");
+	if (ifs.is_open())
+	{
+		std::string key;
+		std::string key2;
+		while (ifs >> key >> key2)
+		{
+			keybinds[key] = supportedKeys->at(key2);
+		}
+	}
+
+	ifs.close();
+	
 	background.setSize(sf::Vector2f(window->getSize()));
 
 	if (!backgroundTexture.loadFromFile("Resources/Images/Backgrounds/mainmenu_bg.jpg"))
@@ -60,8 +74,8 @@ void MainMenuState::initialize()
 }
 
 
-MainMenuState::MainMenuState(sf::RenderWindow* window,std::stack<State*>* states)
-	: State(window,states)
+MainMenuState::MainMenuState(sf::RenderWindow* window,std::stack<State*>* states, std::map<std::string, int>* supportedKeys)
+	: State(window,states,supportedKeys)
 {
 	initialize();
 }
@@ -82,7 +96,7 @@ void MainMenuState::update(const float& dt)
 	//New Game
 	if (buttons["GAME_STATE"]->isPressed())
 	{
-		states->push(new GameState(window, states));
+		states->push(new GameState(window, states,supportedKeys));
 		std::cout << "Game open" << std::endl;
 	}
 
@@ -92,7 +106,7 @@ void MainMenuState::update(const float& dt)
 		exit();
 	}
 	
-	updateMousePosition();
+	updateInput();
 }
 
 void MainMenuState::render(sf::RenderTarget* target)

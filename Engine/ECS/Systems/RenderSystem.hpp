@@ -3,11 +3,12 @@
 #include "../Core/Coordinator.hpp"
 
 
-class RendererSystem
+class RenderSystem
 	:public System
 {
 public:
-	void update(float dt, Coordinator* coordinator)
+	
+	void update(Coordinator* coordinator)
 	{
 		for (auto const& entity : mEntities)
 		{
@@ -18,6 +19,21 @@ public:
 				display.sprite.setPosition(transform.position);
 				display.sprite.setScale(transform.scale);
 				display.sprite.setRotation(transform.rotation);
+			}
+		}
+	}
+
+	void render(Coordinator* coordinator, sf::RenderWindow* window)
+	{
+		for (auto const& entity : mEntities)
+		{
+			{
+				auto& display = coordinator->GetComponent<Display>(entity);
+
+				window->clear();
+				
+				window->draw(display.sprite);
+
 			}
 		}
 	}

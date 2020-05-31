@@ -4,5 +4,4 @@
 struct Display
 {
 	sf::Sprite sprite;
-	bool isAnimated;
 };

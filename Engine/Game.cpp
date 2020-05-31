@@ -4,9 +4,23 @@
 
 void Game::initialize()
 {
+
+    std::ifstream ifs("Config/supported_keys.ini");
+    if (ifs.is_open())
+    {
+        std::string key;
+        int key_value = 0;
+        while (ifs >> key >> key_value)
+        {
+            supportedKeys[key] = key_value;
+        }
+    }
+
+    ifs.close();
+	
     window = new sf::RenderWindow(sf::VideoMode(1280, 720), "Test");
 
-    states.push(new MainMenuState(window, &states));
+    states.push(new MainMenuState(window, &states,&supportedKeys));
 	
 }
 

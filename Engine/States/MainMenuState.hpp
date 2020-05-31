@@ -18,7 +18,7 @@ private:
 	//Functions
 	void initialize();
 public:
-	MainMenuState(sf::RenderWindow* window, std::stack<State*>* states);
+	MainMenuState(sf::RenderWindow* window, std::stack<State*>* states, std::map<std::string, int>* supportedKeys);
 	virtual ~MainMenuState();
 
 	//Functions

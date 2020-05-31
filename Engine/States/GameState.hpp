@@ -8,7 +8,10 @@ class GameState : public State
 private:
 	Coordinator cardinal;
 	Signature signature;
-	std::shared_ptr<RendererSystem> renderer;
+	std::shared_ptr<RenderSystem> renderer;
+	std::shared_ptr<ControlSystem> controler;
+	std::shared_ptr<PhysicsSystem> physics;
+	std::shared_ptr<AnimationSystem> animator;
 
 	std::map<std::string, sf::Texture> textures;
 
@@ -18,7 +21,7 @@ private:
 public:
 	Entity player;
 	
-	GameState(sf::RenderWindow* window, std::stack<State*>* states);
+	GameState(sf::RenderWindow* window, std::stack<State*>* states, std::map<std::string, int>* supportedKeys);
 	virtual ~GameState();
 
 	void update(const float& dt) override;

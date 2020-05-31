@@ -16,7 +16,8 @@ private:
 	sf::RectangleShape square;
 
 	std::stack<State*> states;
-
+	std::map<std::string, int> supportedKeys;
+	
 	void initialize();
 public:
 	Game();
