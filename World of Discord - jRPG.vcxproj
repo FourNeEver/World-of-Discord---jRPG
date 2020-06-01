@@ -163,7 +163,8 @@
     <ClInclude Include="Engine\ECS\Components.hpp" />
     <ClInclude Include="Engine\Animation.hpp" />
     <ClInclude Include="Engine\ECS\Components\Animated.hpp" />
-    <ClInclude Include="Engine\ECS\Components\Display.hpp" />
+    <ClInclude Include="Engine\ECS\Components\Collider.hpp" />
+    <ClInclude Include="Engine\ECS\Components\Sprite.hpp" />
     <ClInclude Include="Engine\ECS\Components\Physical.hpp" />
     <ClInclude Include="Engine\ECS\Components\Transform.hpp" />
     <ClInclude Include="Engine\ECS\Core\Component.hpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Engine\ECS\ECS.hpp" />
     <ClInclude Include="Engine\ECS\Systems.hpp" />
     <ClInclude Include="Engine\ECS\Systems\AnimationSystem.hpp" />
+    <ClInclude Include="Engine\ECS\Systems\CollisionSystem.hpp" />
     <ClInclude Include="Engine\ECS\Systems\ControlSystem.hpp" />
     <ClInclude Include="Engine\ECS\Systems\PhysicsSystem.hpp" />
     <ClInclude Include="Engine\ECS\Systems\RenderSystem.hpp" />

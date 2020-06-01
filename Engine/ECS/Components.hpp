@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Components/Transform.hpp"
-#include "Components/Display.hpp"
+#include "Components/Sprite.hpp"
 #include "Components/Physical.hpp"
 #include "Components/Animated.hpp"
+#include "Components/Collider.hpp"

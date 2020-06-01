@@ -14,7 +14,7 @@ public:
 		for (auto const& entity : mEntities)
 		{
 			auto& animated = coordinator->GetComponent<Animated>(entity);
-			auto& display = coordinator->GetComponent<Display>(entity);
+			auto& sprite = coordinator->GetComponent<Sprite>(entity);
 
 			std::ifstream ifs(animated.path);
 			if (ifs.is_open())
@@ -26,7 +26,7 @@ public:
 
 				while (ifs >> animationName >> animation_timer >> start_frame_x >> start_frame_y >> frames_x >> frames_y >> width >> height)
 				{
-					animated.animations[animationName] = new Animation(&display.sprite, &animated.texture_sheet, animation_timer, start_frame_x, start_frame_y, frames_x, frames_y, width, height);
+					animated.animations[animationName] = new Animation(&sprite.sprite, &sprite.texture, animation_timer, start_frame_x, start_frame_y, frames_x, frames_y, width, height);
 				}
 				
 			}

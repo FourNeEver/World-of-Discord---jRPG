@@ -7,18 +7,31 @@ class RenderSystem
 	:public System
 {
 public:
+
+	void init(Coordinator* coordinator)
+	{
+		for (auto const& entity : mEntities)
+		{
+			{
+				auto& sprite = coordinator->GetComponent<Sprite>(entity);
+
+				sprite.sprite.setTexture(sprite.texture);
+				sprite.sprite.setTextureRect(sprite.sprite_rect);
+			}
+		}
+	}
 	
 	void update(Coordinator* coordinator)
 	{
 		for (auto const& entity : mEntities)
 		{
 			{
-				auto& display = coordinator->GetComponent<Display>(entity);
+				auto& sprite = coordinator->GetComponent<Sprite>(entity);
 				auto& transform = coordinator->GetComponent<Transform>(entity);
-
-				display.sprite.setPosition(transform.position);
-				display.sprite.setScale(transform.scale);
-				display.sprite.setRotation(transform.rotation);
+				
+				sprite.sprite.setPosition(transform.position);
+				sprite.sprite.setScale(transform.scale);
+				sprite.sprite.setRotation(transform.rotation);
 			}
 		}
 	}
@@ -28,11 +41,11 @@ public:
 		for (auto const& entity : mEntities)
 		{
 			{
-				auto& display = coordinator->GetComponent<Display>(entity);
+				auto& sprite = coordinator->GetComponent<Sprite>(entity);
 
-				window->clear();
 				
-				window->draw(display.sprite);
+				
+				window->draw(sprite.sprite);
 
 			}
 		}

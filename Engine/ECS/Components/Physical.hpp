@@ -9,6 +9,7 @@ struct Physical
 	float maxVelocity;
 	sf::Vector2f direction;
 	bool isIdle;
+	sf::Vector2f move_predict;
 };
 
 
