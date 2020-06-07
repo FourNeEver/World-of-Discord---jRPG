@@ -15,6 +15,7 @@ private:
 	std::shared_ptr<PhysicsSystem> physics;
 	std::shared_ptr<AnimationSystem> animator;
 	std::shared_ptr<CollisionSystem> collider;
+	std::shared_ptr<BattleSystem> battler;
 
 	std::map<std::string, sf::Texture> textures;
 
@@ -23,6 +24,7 @@ private:
 
 public:
 	Entity player;
+	Entity enemy;
 	std::array<Entity,256> tile_map;
 	std::vector<Entity> collider_map;
 	

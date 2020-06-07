@@ -94,3 +94,8 @@ void Button::render(sf::RenderTarget* target)
 	target->draw(this->shape);
 	target->draw(this->text);
 }
+
+void Button::change(std::string new_text)
+{
+	text.setString(new_text);
+}

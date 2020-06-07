@@ -157,6 +157,7 @@
     <ClCompile Include="Engine\States\State.cpp" />
     <ClCompile Include="Engine\States\MainMenuState.cpp" />
     <ClCompile Include="Engine\States\GameState.cpp" />
+    <ClCompile Include="Engine\States\SettingState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Button.hpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Engine\ECS\Components\Collider.hpp" />
     <ClInclude Include="Engine\ECS\Components\Sprite.hpp" />
     <ClInclude Include="Engine\ECS\Components\Physical.hpp" />
+    <ClInclude Include="Engine\ECS\Components\Statistics.hpp" />
     <ClInclude Include="Engine\ECS\Components\Transform.hpp" />
     <ClInclude Include="Engine\ECS\Core\Component.hpp" />
     <ClInclude Include="Engine\ECS\Core\Coordinator.hpp" />
@@ -174,6 +176,7 @@
     <ClInclude Include="Engine\ECS\ECS.hpp" />
     <ClInclude Include="Engine\ECS\Systems.hpp" />
     <ClInclude Include="Engine\ECS\Systems\AnimationSystem.hpp" />
+    <ClInclude Include="Engine\ECS\Systems\BattleSystem.hpp" />
     <ClInclude Include="Engine\ECS\Systems\CollisionSystem.hpp" />
     <ClInclude Include="Engine\ECS\Systems\ControlSystem.hpp" />
     <ClInclude Include="Engine\ECS\Systems\PhysicsSystem.hpp" />
@@ -183,6 +186,7 @@
     <ClInclude Include="Engine\States\State.hpp" />
     <ClInclude Include="Engine\States\MainMenuState.hpp" />
     <ClInclude Include="Engine\States\GameState.hpp" />
+    <ClInclude Include="Engine\States\SettingState.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

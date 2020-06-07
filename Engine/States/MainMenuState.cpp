@@ -1,6 +1,7 @@
 #include "MainMenuState.hpp"
 
 #include "GameState.hpp"
+#include "SettingState.hpp"
 
 void MainMenuState::initialize()
 {
@@ -100,6 +101,11 @@ void MainMenuState::update(const float& dt)
 		std::cout << "Game open" << std::endl;
 	}
 
+	if (buttons["SETTINGS"]->isPressed())
+	{
+		states->push(new SettingState(window, states, supportedKeys));
+	}
+	
 	//Quit the game
 	if (buttons["EXIT_STATE"]->isPressed())
 	{

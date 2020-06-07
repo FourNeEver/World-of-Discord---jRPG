@@ -17,7 +17,8 @@ public:
 			auto& transform = coordinator->GetComponent<Transform>(entity);
 
 			collider.hitbox = sf::FloatRect(transform.position.x, transform.position.y, collider.widht, collider.hight);
-			
+
+			collider.colliding["ACTION"] = false;
 			collider.colliding["UP"] = false;
 			collider.colliding["DOWN"] = false;
 			collider.colliding["LEFT"] = false;
@@ -31,7 +32,7 @@ public:
 		{
 			auto& transform = coordinator->GetComponent<Transform>(entity);
 			auto& collider = coordinator->GetComponent<Collider>(entity);
-			collider.hitbox = sf::FloatRect(transform.position.x, transform.position.y, collider.widht, collider.hight);
+			collider.hitbox = sf::FloatRect(transform.position.x + collider.offset.x, transform.position.y + collider.offset.y, collider.widht, collider.hight);
 		}
 	}
 
@@ -41,9 +42,10 @@ public:
 		bool haveColliderBottom = false;
 		bool haveColliderLeft = false;
 		bool haveColliderRight = false;
+		bool Interact = false;
 		auto& p_collider = coordinator->GetComponent<Collider>(*player);
 		auto& p_physical = coordinator->GetComponent<Physical>(*player);
-		p_collider.hitbox = sf::FloatRect(p_physical.move_predict.x, p_physical.move_predict.y, p_collider.widht, p_collider.hight);
+		p_collider.hitbox = sf::FloatRect(p_physical.move_predict.x + p_collider.offset.x, p_physical.move_predict.y + p_collider.offset.y, p_collider.widht, p_collider.hight);
 
 		
 		for (auto const& entity : mEntities)
@@ -51,47 +53,53 @@ public:
 			auto& collider = coordinator->GetComponent<Collider>(entity);
 			if (p_collider.flag != collider.flag)
 			{
-				//if(p_collider.hitbox.intersects(collider.hitbox))
-				//{
-				//	std::cout << "Collision" << std::endl;
-				//	haveColliderTop = true;
-				//}
-				if((p_collider.hitbox.top-1 <= collider.hitbox.top+collider.hitbox.height) && (p_collider.hitbox.top > collider.hitbox.top)
-					&& (((p_collider.hitbox.left >= collider.hitbox.left) && (p_collider.hitbox.left <= collider.hitbox.left + collider.hitbox.width))
-					|| ((p_collider.hitbox.left + p_collider.hitbox.width >= collider.hitbox.left) && (p_collider.hitbox.left + p_collider.hitbox.width <= collider.hitbox.left + collider.hitbox.width))))
+				if (collider.flag == "TILE")
 				{
-					std::cout << "Collision Top" << std::endl;
-					haveColliderTop = true;
+					if ((p_collider.hitbox.top - 1 <= collider.hitbox.top + collider.hitbox.height) && (p_collider.hitbox.top > collider.hitbox.top)
+						&& (((p_collider.hitbox.left >= collider.hitbox.left) && (p_collider.hitbox.left <= collider.hitbox.left + collider.hitbox.width))
+							|| ((p_collider.hitbox.left + p_collider.hitbox.width >= collider.hitbox.left) && (p_collider.hitbox.left + p_collider.hitbox.width <= collider.hitbox.left + collider.hitbox.width))))
+					{
+						//std::cout << "Collision Top" << std::endl;
+						haveColliderTop = true;
+					}
+					if ((p_collider.hitbox.top + p_collider.hitbox.height + 1 >= collider.hitbox.top) && (p_collider.hitbox.top + p_collider.hitbox.height < collider.hitbox.top + collider.hitbox.height)
+						&& (((p_collider.hitbox.left >= collider.hitbox.left) && (p_collider.hitbox.left <= collider.hitbox.left + collider.hitbox.width))
+							|| ((p_collider.hitbox.left + p_collider.hitbox.width >= collider.hitbox.left) && (p_collider.hitbox.left + p_collider.hitbox.width <= collider.hitbox.left + collider.hitbox.width))))
+					{
+						//std::cout << "Collision Bottom" << std::endl;
+						haveColliderBottom = true;
+					}
+					if ((p_collider.hitbox.left - 1 <= collider.hitbox.left + collider.hitbox.width) && (p_collider.hitbox.left > collider.hitbox.left)
+						&& (((p_collider.hitbox.top >= collider.hitbox.top) && (p_collider.hitbox.top <= collider.hitbox.top + collider.hitbox.height))
+							|| ((p_collider.hitbox.top + p_collider.hitbox.height >= collider.hitbox.top) && (p_collider.hitbox.top + p_collider.hitbox.height <= collider.hitbox.top + collider.hitbox.height))))
+					{
+						//std::cout << "Collision Left" << std::endl;
+						haveColliderLeft = true;
+					}
+					if ((p_collider.hitbox.left + p_collider.hitbox.width + 1 >= collider.hitbox.left) && (p_collider.hitbox.left + p_collider.hitbox.width < collider.hitbox.left + collider.hitbox.width)
+						&& (((p_collider.hitbox.top >= collider.hitbox.top) && (p_collider.hitbox.top <= collider.hitbox.top + collider.hitbox.height))
+							|| ((p_collider.hitbox.top + p_collider.hitbox.height >= collider.hitbox.top) && (p_collider.hitbox.top + p_collider.hitbox.height <= collider.hitbox.top + collider.hitbox.height))))
+					{
+						//std::cout << "Collision Right" << std::endl;
+						haveColliderRight = true;
+					}
 				}
-				if ((p_collider.hitbox.top + p_collider.hitbox.height + 1 >= collider.hitbox.top) && (p_collider.hitbox.top + p_collider.hitbox.height < collider.hitbox.top + collider.hitbox.height)
-					&& (((p_collider.hitbox.left >= collider.hitbox.left) && (p_collider.hitbox.left <= collider.hitbox.left + collider.hitbox.width))
-					|| ((p_collider.hitbox.left + p_collider.hitbox.width >= collider.hitbox.left) && (p_collider.hitbox.left + p_collider.hitbox.width <= collider.hitbox.left + collider.hitbox.width))))
+				else
 				{
-					std::cout << "Collision Bottom" << std::endl;
-					haveColliderBottom = true;
-				}
-				if ((p_collider.hitbox.left -1 <= collider.hitbox.left+collider.hitbox.width) && (p_collider.hitbox.left > collider.hitbox.left)
-					&& (((p_collider.hitbox.top>=collider.hitbox.top) && (p_collider.hitbox.top<=collider.hitbox.top+collider.hitbox.height))
-					|| ((p_collider.hitbox.top + p_collider.hitbox.height >= collider.hitbox.top) && (p_collider.hitbox.top + p_collider.hitbox.height <= collider.hitbox.top + collider.hitbox.height))))
-				{
-					std::cout << "Collision Left" << std::endl;
-					haveColliderLeft = true;
-				}
-				if ((p_collider.hitbox.left +p_collider.hitbox.width + 1 >= collider.hitbox.left) && (p_collider.hitbox.left + p_collider.hitbox.width < collider.hitbox.left + collider.hitbox.width)
-					&& (((p_collider.hitbox.top >= collider.hitbox.top) && (p_collider.hitbox.top <= collider.hitbox.top + collider.hitbox.height))
-					|| ((p_collider.hitbox.top + p_collider.hitbox.height >= collider.hitbox.top) && (p_collider.hitbox.top + p_collider.hitbox.height <= collider.hitbox.top + collider.hitbox.height))))
-				{
-					std::cout << "Collision Right" << std::endl;
-					haveColliderRight = true;
+					if (p_collider.hitbox.intersects(collider.hitbox))
+					{
+						std::cout << "Collision" << std::endl;
+						Interact = true;
+					}
 				}
 			}
-			
 		}
 
 		p_collider.colliding.at("UP") = haveColliderTop;
 		p_collider.colliding.at("DOWN") = haveColliderBottom;
 		p_collider.colliding.at("LEFT") = haveColliderLeft;
 		p_collider.colliding.at("RIGHT") = haveColliderRight;
+		p_collider.colliding.at("ACTION") = Interact;
 	}
 
 	void render(Coordinator* coordinator, sf::RenderWindow* window)

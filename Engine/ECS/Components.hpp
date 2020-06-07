@@ -5,3 +5,4 @@
 #include "Components/Physical.hpp"
 #include "Components/Animated.hpp"
 #include "Components/Collider.hpp"
+#include "Components/Statistics.hpp"

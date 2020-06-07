@@ -5,3 +5,4 @@
 #include "Systems/PhysicsSystem.hpp"
 #include "Systems/AnimationSystem.hpp"
 #include "Systems/CollisionSystem.hpp"
+#include "Systems/BattleSystem.hpp"

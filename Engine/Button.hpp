@@ -25,6 +25,9 @@ private:
 
 
 public:
+
+
+	
 	Button(float x, float y, float width, float height, sf::Font* font, std::string text,
 		unsigned character_size, sf::Color text_idle_color, sf::Color text_hover_color,
 		sf::Color text_active_color, sf::Color idle_color, sf::Color hover_color,
@@ -37,4 +40,6 @@ public:
 	//Functions
 	void update(const sf::Vector2f mousePos);
 	void render(sf::RenderTarget* target);
+
+	void change(std::string new_text);
 };

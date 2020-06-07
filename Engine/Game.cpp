@@ -43,7 +43,6 @@ Game::~Game()
 void Game::update()
 {
     Elapsed = DeltaTime.restart();
-
     while (window->pollEvent(event)) {
         // "close requested" event: we close the window
         if (event.type == sf::Event::Closed) {
@@ -68,6 +67,8 @@ void Game::update()
     {
         window->close();
     }
+
+    std::cout << Elapsed.asSeconds() << std::endl;
 }
 
 void Game::render()

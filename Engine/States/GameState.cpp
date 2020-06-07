@@ -9,6 +9,7 @@ void GameState::ECSinit()
 	cardinal.RegisterComponent<Physical>();
 	cardinal.RegisterComponent<Animated>();
 	cardinal.RegisterComponent<Collider>();
+	cardinal.RegisterComponent<Statistics>();
 
 	renderer = cardinal.RegisterSystem<RenderSystem>();
 	{
@@ -46,7 +47,16 @@ void GameState::ECSinit()
 		signature.set(cardinal.GetComponentType<Collider>());
 		cardinal.SetSystemSignature<CollisionSystem>(signature);
 	}
+	battler = cardinal.RegisterSystem<BattleSystem>();
+	{
+		Signature signature;
+		signature.set(cardinal.GetComponentType<Collider>());
+		signature.set(cardinal.GetComponentType<Statistics>());
+		signature.set(cardinal.GetComponentType<Sprite>());
+		cardinal.SetSystemSignature<BattleSystem>(signature);
+	}
 
+	
 	int map[16][16];
 	std::ifstream ifs("Resources/Map/Test.map");
 	if (ifs.is_open())
@@ -87,14 +97,20 @@ void GameState::ECSinit()
 		}
 	}
 
+
+	enemy = cardinal.CreateEntity();
+	cardinal.AddComponent(enemy, Transform{ sf::Vector2f(200,200),0,sf::Vector2f(2,2) });
+	cardinal.AddComponent(enemy, Sprite{ textures["ENEMY_SHEET"] , sf::IntRect(0, 0, 32, 32) });
+	cardinal.AddComponent(enemy, Collider{ "ENEMY",64,64,sf::Vector2f(0,0) });
+	cardinal.AddComponent(enemy, Statistics{ "Human",1,0,0,40,40,5,3,6,4,3 });
 	
 	player = cardinal.CreateEntity();
 	cardinal.AddComponent(player, Transform{sf::Vector2f(100,100),0,sf::Vector2f(2,2)});
 	cardinal.AddComponent(player, Sprite{ textures["PLAYER_SHEET"] , sf::IntRect(0, 0, 32, 32) });
 	cardinal.AddComponent(player, Physical{ sf::Vector2f(0,0),10.f,5.0f,200.f,sf::Vector2f(0,0),true});
 	cardinal.AddComponent(player, Animated{"IDLE","Resources/Animations/player.animate"});
-	cardinal.AddComponent(player, Collider{"PLAYER",64,64});
-
+	cardinal.AddComponent(player, Collider{"PLAYER",32,64,sf::Vector2f(0,32)});
+	cardinal.AddComponent(player, Statistics{ "Human",1,0,10,60,60,7,5,10,7,6 });
 	
 	renderer->init(&cardinal);
 	animator->init(&cardinal);
@@ -123,6 +139,8 @@ void GameState::initialize()
 	ifs.close();
 	
 	if (!textures["PLAYER_SHEET"].loadFromFile("Resources/Sprites/Characters/Knight.png"))
+		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
+	if (!textures["ENEMY_SHEET"].loadFromFile("Resources/Sprites/Characters/Enemy_texture.png"))
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
 	if (!textures["BRICK"].loadFromFile("Resources/Map/Pixel Brick 64.png"))
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_TILESET";
@@ -157,6 +175,7 @@ void GameState::update(const float& dt)
 	}
 
 	collider->collide(&cardinal, &player);
+
 	
 	collider->update(&cardinal);
 	controler->update(&cardinal, &keybinds);
@@ -167,7 +186,7 @@ void GameState::update(const float& dt)
 
 
 	//Debug
-	std::cout << cardinal.GetComponent<Physical>(player).velocity.x << " " << cardinal.GetComponent<Physical>(player).velocity.y << std::endl;
+	//std::cout << cardinal.GetComponent<Physical>(player).velocity.x << " " << cardinal.GetComponent<Physical>(player).velocity.y << std::endl;
 
 }
 
@@ -177,7 +196,7 @@ void GameState::render(sf::RenderTarget* target)
 
 	renderer->render(&cardinal, window);
 	
-	////*Debug* shows hitboxes
+	//*Debug* shows hitboxes
 	//collider->render(&cardinal, window);
 
 	view.setCenter(cardinal.GetComponent<Transform>(player).position);
