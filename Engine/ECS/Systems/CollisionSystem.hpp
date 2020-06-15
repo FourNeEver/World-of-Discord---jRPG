@@ -42,7 +42,7 @@ public:
 		bool haveColliderBottom = false;
 		bool haveColliderLeft = false;
 		bool haveColliderRight = false;
-		bool Interact = false;
+
 		auto& p_collider = coordinator->GetComponent<Collider>(*player);
 		auto& p_physical = coordinator->GetComponent<Physical>(*player);
 		p_collider.hitbox = sf::FloatRect(p_physical.move_predict.x + p_collider.offset.x, p_physical.move_predict.y + p_collider.offset.y, p_collider.widht, p_collider.hight);
@@ -82,15 +82,19 @@ public:
 					{
 						//std::cout << "Collision Right" << std::endl;
 						haveColliderRight = true;
+						
 					}
+					
 				}
 				else
 				{
 					if (p_collider.hitbox.intersects(collider.hitbox))
 					{
 						std::cout << "Collision" << std::endl;
-						Interact = true;
+						collider.colliding.at("ACTION") = true;
 					}
+					
+					
 				}
 			}
 		}
@@ -99,7 +103,6 @@ public:
 		p_collider.colliding.at("DOWN") = haveColliderBottom;
 		p_collider.colliding.at("LEFT") = haveColliderLeft;
 		p_collider.colliding.at("RIGHT") = haveColliderRight;
-		p_collider.colliding.at("ACTION") = Interact;
 	}
 
 	void render(Coordinator* coordinator, sf::RenderWindow* window)

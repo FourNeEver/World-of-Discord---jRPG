@@ -43,4 +43,15 @@ public:
 		}
 	}
 
+	void reinit(Coordinator *coordinator)
+	{
+		for (auto const& entity : mEntities)
+		{
+			auto& animated = coordinator->GetComponent<Animated>(entity);
+
+			animated.animations.clear();
+		}
+
+		init(coordinator);
+	}
 };

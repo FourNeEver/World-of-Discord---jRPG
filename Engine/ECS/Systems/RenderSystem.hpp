@@ -12,12 +12,11 @@ public:
 	{
 		for (auto const& entity : mEntities)
 		{
-			{
-				auto& sprite = coordinator->GetComponent<Sprite>(entity);
+			auto& sprite = coordinator->GetComponent<Sprite>(entity);
 
-				sprite.sprite.setTexture(sprite.texture);
-				sprite.sprite.setTextureRect(sprite.sprite_rect);
-			}
+			sprite.sprite.setTexture(sprite.texture);
+			sprite.sprite.setTextureRect(sprite.sprite_rect);
+
 		}
 	}
 	
@@ -25,14 +24,14 @@ public:
 	{
 		for (auto const& entity : mEntities)
 		{
-			{
-				auto& sprite = coordinator->GetComponent<Sprite>(entity);
-				auto& transform = coordinator->GetComponent<Transform>(entity);
-				
-				sprite.sprite.setPosition(transform.position);
-				sprite.sprite.setScale(transform.scale);
-				sprite.sprite.setRotation(transform.rotation);
-			}
+
+			auto& sprite = coordinator->GetComponent<Sprite>(entity);
+			auto& transform = coordinator->GetComponent<Transform>(entity);
+
+			sprite.sprite.setPosition(transform.position);
+			sprite.sprite.setScale(transform.scale);
+			sprite.sprite.setRotation(transform.rotation);
+
 		}
 	}
 
@@ -40,14 +39,13 @@ public:
 	{
 		for (auto const& entity : mEntities)
 		{
-			{
-				auto& sprite = coordinator->GetComponent<Sprite>(entity);
 
-				
-				
-				window->draw(sprite.sprite);
+			auto& sprite = coordinator->GetComponent<Sprite>(entity);
 
-			}
+
+
+			window->draw(sprite.sprite);
+
 		}
 	}
 	

@@ -24,9 +24,9 @@ private:
 
 public:
 	Entity player;
-	Entity enemy;
+	std::vector<Entity> enemy;
 	std::array<Entity,256> tile_map;
-	std::vector<Entity> collider_map;
+
 	
 	
 	GameState(sf::RenderWindow* window, std::stack<State*>* states, std::map<std::string, int>* supportedKeys);
@@ -34,8 +34,5 @@ public:
 
 	void update(const float& dt) override;
 	void render(sf::RenderTarget* target = nullptr) override;
-
-	void load_map(const char* path);
-	
 };
 

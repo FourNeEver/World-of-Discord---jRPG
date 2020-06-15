@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Bar.cpp" />
     <ClCompile Include="Engine\Button.cpp" />
     <ClCompile Include="Engine\main.cpp" />
     <ClCompile Include="Engine\Game.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="Engine\States\SettingState.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Bar.hpp" />
     <ClInclude Include="Engine\Button.hpp" />
     <ClInclude Include="Engine\ECS\Components.hpp" />
     <ClInclude Include="Engine\Animation.hpp" />

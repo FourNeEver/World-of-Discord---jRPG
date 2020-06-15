@@ -97,20 +97,20 @@ void GameState::ECSinit()
 		}
 	}
 
-
-	enemy = cardinal.CreateEntity();
-	cardinal.AddComponent(enemy, Transform{ sf::Vector2f(200,200),0,sf::Vector2f(2,2) });
-	cardinal.AddComponent(enemy, Sprite{ textures["ENEMY_SHEET"] , sf::IntRect(0, 0, 32, 32) });
-	cardinal.AddComponent(enemy, Collider{ "ENEMY",64,64,sf::Vector2f(0,0) });
-	cardinal.AddComponent(enemy, Statistics{ "Human",1,0,0,40,40,5,3,6,4,3 });
-	
 	player = cardinal.CreateEntity();
-	cardinal.AddComponent(player, Transform{sf::Vector2f(100,100),0,sf::Vector2f(2,2)});
+	cardinal.AddComponent(player, Transform{ sf::Vector2f(100,100),0,sf::Vector2f(2,2) });
 	cardinal.AddComponent(player, Sprite{ textures["PLAYER_SHEET"] , sf::IntRect(0, 0, 32, 32) });
-	cardinal.AddComponent(player, Physical{ sf::Vector2f(0,0),10.f,5.0f,200.f,sf::Vector2f(0,0),true});
-	cardinal.AddComponent(player, Animated{"IDLE","Resources/Animations/player.animate"});
-	cardinal.AddComponent(player, Collider{"PLAYER",32,64,sf::Vector2f(0,32)});
+	cardinal.AddComponent(player, Physical{ sf::Vector2f(0,0),10.f,5.0f,200.f,sf::Vector2f(0,0),true });
+	cardinal.AddComponent(player, Animated{ "IDLE","Resources/Animations/player.animate" });
+	cardinal.AddComponent(player, Collider{ "PLAYER",32,64,sf::Vector2f(0,32) });
 	cardinal.AddComponent(player, Statistics{ "Human",1,0,10,60,60,7,5,10,7,6 });
+
+	enemy.emplace_back(cardinal.CreateEntity());
+	cardinal.AddComponent(enemy.front(), Transform{ sf::Vector2f(200,200),0,sf::Vector2f(2,2) });
+	cardinal.AddComponent(enemy.front(), Sprite{ textures["ENEMY_SHEET"] , sf::IntRect(0, 0, 32, 32) });
+	cardinal.AddComponent(enemy.front(), Collider{ "ENEMY",64,64,sf::Vector2f(0,0) });
+	cardinal.AddComponent(enemy.front(), Statistics{ "Human",1,0,0,40,40,5,3,6,4,3 });
+	
 	
 	renderer->init(&cardinal);
 	animator->init(&cardinal);
@@ -146,7 +146,7 @@ void GameState::initialize()
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_TILESET";
 	if (!textures["GRASS"].loadFromFile("Resources/Map/Pixel GRASS 64.png"))
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_TILESET";
-	
+
 
 	
 
@@ -175,33 +175,45 @@ void GameState::update(const float& dt)
 	}
 
 	collider->collide(&cardinal, &player);
-
 	
 	collider->update(&cardinal);
 	controler->update(&cardinal, &keybinds);
 	physics->update(dt, &cardinal);
-	animator->update(&cardinal,dt);
+	animator->update(&cardinal, dt);
 	renderer->update(&cardinal);
+	battler->update(&cardinal, &player, window,renderer,animator);
+		//animator->reset(&cardinal);
 
+	
 
+	
+	std::cout << cardinal.GetComponent<Animated>(player).currentAnimation << std::endl;
 
-	//Debug
-	//std::cout << cardinal.GetComponent<Physical>(player).velocity.x << " " << cardinal.GetComponent<Physical>(player).velocity.y << std::endl;
+	for (auto& e : enemy)
+	{
+		if (!cardinal.GetComponent<Statistics>(e).alive)
+		{
+			cardinal.DestroyEntity(e);
+			enemy.clear();
+		}
+	}
 
 }
 
+
 void GameState::render(sf::RenderTarget* target)
 {
+
+
 	window->clear();
 
 	renderer->render(&cardinal, window);
-	
-	//*Debug* shows hitboxes
+
+	////*Debug* shows hitboxes
 	//collider->render(&cardinal, window);
 
 	view.setCenter(cardinal.GetComponent<Transform>(player).position);
 	window->setView(view);
-	
-	
-}
 
+
+}

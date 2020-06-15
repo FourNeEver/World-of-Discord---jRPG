@@ -15,5 +15,6 @@ struct Statistics
 	int magic;
 	int defense;
 	int resistance;
-	
+
+	bool alive = true;
 };

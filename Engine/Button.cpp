@@ -66,6 +66,7 @@ void Button::update(const sf::Vector2f mousePos)
 			this->buttonState = BTN_ACTIVE;
 		}
 	}
+	
 
 	switch (this->buttonState)
 	{
