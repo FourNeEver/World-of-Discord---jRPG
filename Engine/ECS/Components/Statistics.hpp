@@ -3,6 +3,7 @@
 
 struct Statistics
 {
+	std::string name;
 	std::string race;
 	int level;
 	int expirence;

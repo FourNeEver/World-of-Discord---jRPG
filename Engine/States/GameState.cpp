@@ -10,6 +10,7 @@ void GameState::ECSinit()
 	cardinal.RegisterComponent<Animated>();
 	cardinal.RegisterComponent<Collider>();
 	cardinal.RegisterComponent<Statistics>();
+	cardinal.RegisterComponent<Team>();
 
 	renderer = cardinal.RegisterSystem<RenderSystem>();
 	{
@@ -53,6 +54,7 @@ void GameState::ECSinit()
 		signature.set(cardinal.GetComponentType<Collider>());
 		signature.set(cardinal.GetComponentType<Statistics>());
 		signature.set(cardinal.GetComponentType<Sprite>());
+		signature.set(cardinal.GetComponentType<Team>());
 		cardinal.SetSystemSignature<BattleSystem>(signature);
 	}
 
@@ -80,12 +82,12 @@ void GameState::ECSinit()
 		tile = cardinal.CreateEntity();
 		if (map[x][y] == 1)
 		{
-			cardinal.AddComponent(tile, Sprite{ sf::Texture(textures["BRICK"]),sf::IntRect(0,0,64,64) });
+			cardinal.AddComponent(tile, Sprite{ sf::Texture(textures["BRICK"]),sf::IntRect(0,0,64,64),true });
 			cardinal.AddComponent(tile, Collider{ "TILE",64,64 });
 		}
 		else
 		{
-			cardinal.AddComponent(tile, Sprite{ sf::Texture(textures["GRASS"]),sf::IntRect(0,0,64,64) });
+			cardinal.AddComponent(tile, Sprite{ sf::Texture(textures["GRASS"]),sf::IntRect(0,0,64,64),true });
 		}
 		
 		cardinal.AddComponent(tile, Transform{ sf::Vector2f(64 * y,64 * x),0,sf::Vector2f(1,1) });
@@ -99,18 +101,36 @@ void GameState::ECSinit()
 
 	player = cardinal.CreateEntity();
 	cardinal.AddComponent(player, Transform{ sf::Vector2f(100,100),0,sf::Vector2f(2,2) });
-	cardinal.AddComponent(player, Sprite{ textures["PLAYER_SHEET"] , sf::IntRect(0, 0, 32, 32) });
+	cardinal.AddComponent(player, Sprite{ textures["PLAYER_SHEET"] ,sf::IntRect(0, 0, 32, 32),true });
 	cardinal.AddComponent(player, Physical{ sf::Vector2f(0,0),10.f,5.0f,200.f,sf::Vector2f(0,0),true });
 	cardinal.AddComponent(player, Animated{ "IDLE","Resources/Animations/player.animate" });
 	cardinal.AddComponent(player, Collider{ "PLAYER",32,64,sf::Vector2f(0,32) });
-	cardinal.AddComponent(player, Statistics{ "Human",1,0,10,60,60,7,5,10,7,6 });
+	cardinal.AddComponent(player, Statistics{ "Player","Human",1,0,10,60,60,7,5,10,7,6 });
+	cardinal.AddComponent(player, Team{ {1,2,3} });
+	
+	std::ifstream hero_file("Resources/Heroes/config.hero");
+	if(hero_file.is_open())
+	{
+		int ID = NULL;
+		std::string name, race;
+		int lvl = 0, exp = 0, max_exp = 1, hp = 10, max_hp = 10, str = 1, lck = 1, mag = 1, def = 1, res = 1;
+		while (hero_file >> ID >> name >> race >> lvl >> exp >> max_exp >> hp >> max_hp >> str >> lck >> mag >> def >> res)
+		{
+			heroes[ID] = cardinal.CreateEntity();
+			cardinal.AddComponent(heroes.at(ID), Statistics{ name,race,lvl,exp,max_exp,hp,max_hp,str,lck,mag,def,res });
+			cardinal.AddComponent(heroes.at(ID), Sprite{ textures.at(name),sf::IntRect(0, 0, 32, 32),false });
+			cardinal.AddComponent(heroes.at(ID), Transform{ sf::Vector2f(0,0),0,sf::Vector2f(2,2) });
+		}
+	}
 
+	
 	enemy.emplace_back(cardinal.CreateEntity());
 	cardinal.AddComponent(enemy.front(), Transform{ sf::Vector2f(200,200),0,sf::Vector2f(2,2) });
-	cardinal.AddComponent(enemy.front(), Sprite{ textures["ENEMY_SHEET"] , sf::IntRect(0, 0, 32, 32) });
+	cardinal.AddComponent(enemy.front(), Sprite{ textures["ENEMY_SHEET"] , sf::IntRect(0, 0, 32, 32),true });
+	cardinal.AddComponent(enemy.front(), Animated{ "IDLE","Resources/Animations/enemy.animate" });
 	cardinal.AddComponent(enemy.front(), Collider{ "ENEMY",64,64,sf::Vector2f(0,0) });
-	cardinal.AddComponent(enemy.front(), Statistics{ "Human",1,0,0,40,40,5,3,6,4,3 });
-	
+	cardinal.AddComponent(enemy.front(), Statistics{ "Enemy","Human",1,0,0,40,40,5,3,6,4,3 });
+	cardinal.AddComponent(enemy.front(), Team{ {4} });
 	
 	renderer->init(&cardinal);
 	animator->init(&cardinal);
@@ -137,11 +157,22 @@ void GameState::initialize()
 	}
 
 	ifs.close();
-	
+
 	if (!textures["PLAYER_SHEET"].loadFromFile("Resources/Sprites/Characters/Knight.png"))
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
+
+	if (!textures["Phoenix"].loadFromFile("Resources/Sprites/Characters/Pheonix_sprite.png"))
+		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
+	if (!textures["Kuro"].loadFromFile("Resources/Sprites/Characters/Kuro_sprite.png"))
+		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
+	if (!textures["Frost"].loadFromFile("Resources/Sprites/Characters/Frost_sprite.png"))
+		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
+	if (!textures["Nilvalen"].loadFromFile("Resources/Sprites/Characters/Nilvalen_sprite.png"))
+		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
+	
 	if (!textures["ENEMY_SHEET"].loadFromFile("Resources/Sprites/Characters/Enemy_texture.png"))
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
+	
 	if (!textures["BRICK"].loadFromFile("Resources/Map/Pixel Brick 64.png"))
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_TILESET";
 	if (!textures["GRASS"].loadFromFile("Resources/Map/Pixel GRASS 64.png"))
@@ -181,7 +212,7 @@ void GameState::update(const float& dt)
 	physics->update(dt, &cardinal);
 	animator->update(&cardinal, dt);
 	renderer->update(&cardinal);
-	battler->update(&cardinal, &player, window,renderer,animator);
+	battler->update(&cardinal, &player, window,renderer,animator,&heroes);
 		//animator->reset(&cardinal);
 
 	

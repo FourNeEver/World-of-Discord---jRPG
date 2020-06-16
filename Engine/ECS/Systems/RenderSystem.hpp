@@ -42,9 +42,8 @@ public:
 
 			auto& sprite = coordinator->GetComponent<Sprite>(entity);
 
-
-
-			window->draw(sprite.sprite);
+			if(sprite.isVisible)
+				window->draw(sprite.sprite);
 
 		}
 	}

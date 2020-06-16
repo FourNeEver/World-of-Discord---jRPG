@@ -6,3 +6,4 @@
 #include "Components/Animated.hpp"
 #include "Components/Collider.hpp"
 #include "Components/Statistics.hpp"
+#include "Components/Team.hpp"
