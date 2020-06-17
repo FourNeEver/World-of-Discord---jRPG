@@ -128,5 +128,8 @@
     <ClInclude Include="Engine\ECS\Components\Team.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\ECS\Components\GUI.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

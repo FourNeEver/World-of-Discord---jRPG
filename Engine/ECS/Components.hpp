@@ -7,3 +7,4 @@
 #include "Components/Collider.hpp"
 #include "Components/Statistics.hpp"
 #include "Components/Team.hpp"
+#include "Components/GUI.hpp"

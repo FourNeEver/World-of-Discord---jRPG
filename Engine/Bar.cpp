@@ -1,7 +1,7 @@
 #include "Bar.hpp"
 
 Bar::Bar(sf::Color fill_color, sf::Color empty_color, sf::Vector2f size, sf::FloatRect origin, sf::Vector2f offset, float max, float current, bool isVert)
-	: size_(size),fill_max(max),fill(current),isVertical(isVert)
+	: size_(size),offset_(offset),fill_max(max),fill(current),isVertical(isVert)
 {
 	filled_bar.setSize(size_);
 	filled_bar.setFillColor(fill_color);
@@ -20,8 +20,7 @@ Bar::Bar(sf::Color fill_color, sf::Color empty_color, sf::Vector2f size, sf::Flo
 	outline.setPosition(sf::Vector2f(filled_bar.getPosition().x-1,filled_bar.getPosition().y-1));
 	outline.setOutlineColor(sf::Color::Black);
 	outline.setOutlineThickness(1);
-
-	filled_bar.setSize(sf::Vector2f(size_.x * (fill/fill_max), size_.y));
+	
 	if (isVertical)
 	{
 		filled_bar.rotate(180);
@@ -68,4 +67,24 @@ void Bar::render(sf::RenderWindow* window)
 	window->draw(outline);
 	window->draw(empty_bar);
 	window->draw(filled_bar);
+}
+
+void Bar::update_origin(sf::FloatRect origin)
+{
+	if (isVertical)
+	{
+		filled_bar.setPosition(sf::Vector2f(origin.left + origin.width + offset_.x, origin.top + origin.height / 2 - filled_bar.getSize().y / 2 + offset_.y));
+	}
+	else
+		filled_bar.setPosition(sf::Vector2f(origin.left + origin.width / 2 - filled_bar.getSize().x / 2 + offset_.x, origin.top + origin.height + offset_.y));
+
+	empty_bar.setPosition(filled_bar.getPosition());
+	outline.setPosition(sf::Vector2f(filled_bar.getPosition().x - 1, filled_bar.getPosition().y - 1));
+
+	if (isVertical)
+	{
+		filled_bar.move(sf::Vector2f(0, filled_bar.getSize().y));
+		empty_bar.move(sf::Vector2f(0, empty_bar.getSize().y));
+		outline.move(sf::Vector2f(2, outline.getSize().y));
+	}
 }

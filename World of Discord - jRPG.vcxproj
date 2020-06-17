@@ -167,6 +167,7 @@
     <ClInclude Include="Engine\Animation.hpp" />
     <ClInclude Include="Engine\ECS\Components\Animated.hpp" />
     <ClInclude Include="Engine\ECS\Components\Collider.hpp" />
+    <ClInclude Include="Engine\ECS\Components\GUI.hpp" />
     <ClInclude Include="Engine\ECS\Components\Sprite.hpp" />
     <ClInclude Include="Engine\ECS\Components\Physical.hpp" />
     <ClInclude Include="Engine\ECS\Components\Statistics.hpp" />

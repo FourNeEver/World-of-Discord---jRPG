@@ -11,6 +11,7 @@ void GameState::ECSinit()
 	cardinal.RegisterComponent<Collider>();
 	cardinal.RegisterComponent<Statistics>();
 	cardinal.RegisterComponent<Team>();
+	cardinal.RegisterComponent<GUI>();
 
 	renderer = cardinal.RegisterSystem<RenderSystem>();
 	{
@@ -55,6 +56,7 @@ void GameState::ECSinit()
 		signature.set(cardinal.GetComponentType<Statistics>());
 		signature.set(cardinal.GetComponentType<Sprite>());
 		signature.set(cardinal.GetComponentType<Team>());
+		signature.set(cardinal.GetComponentType<GUI>());
 		cardinal.SetSystemSignature<BattleSystem>(signature);
 	}
 
@@ -107,6 +109,7 @@ void GameState::ECSinit()
 	cardinal.AddComponent(player, Collider{ "PLAYER",32,64,sf::Vector2f(0,32) });
 	cardinal.AddComponent(player, Statistics{ "Player","Human",1,0,10,60,60,7,5,10,7,6 });
 	cardinal.AddComponent(player, Team{ {1,2,3} });
+	cardinal.AddComponent(player, GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(player).sprite.getGlobalBounds(),sf::Vector2f(10,0), cardinal.GetComponent<Statistics>(player).max_health, cardinal.GetComponent<Statistics>(player).health,true) });
 	
 	std::ifstream hero_file("Resources/Heroes/config.hero");
 	if(hero_file.is_open())
@@ -120,6 +123,7 @@ void GameState::ECSinit()
 			cardinal.AddComponent(heroes.at(ID), Statistics{ name,race,lvl,exp,max_exp,hp,max_hp,str,lck,mag,def,res });
 			cardinal.AddComponent(heroes.at(ID), Sprite{ textures.at(name),sf::IntRect(0, 0, 32, 32),false });
 			cardinal.AddComponent(heroes.at(ID), Transform{ sf::Vector2f(0,0),0,sf::Vector2f(2,2) });
+			cardinal.AddComponent(heroes.at(ID), GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(heroes.at(ID)).sprite.getGlobalBounds(), sf::Vector2f(10, 0), cardinal.GetComponent<Statistics>(heroes.at(ID)).max_health, cardinal.GetComponent<Statistics>(heroes.at(ID)).health, true) });
 		}
 	}
 
@@ -131,6 +135,7 @@ void GameState::ECSinit()
 	cardinal.AddComponent(enemy.front(), Collider{ "ENEMY",64,64,sf::Vector2f(0,0) });
 	cardinal.AddComponent(enemy.front(), Statistics{ "Enemy","Human",1,0,0,40,40,5,3,6,4,3 });
 	cardinal.AddComponent(enemy.front(), Team{ {4} });
+	cardinal.AddComponent(enemy.front(), GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(enemy.front()).sprite.getGlobalBounds(),sf::Vector2f(-cardinal.GetComponent<Sprite>(enemy.front()).sprite.getGlobalBounds().width - 5,0), cardinal.GetComponent<Statistics>(enemy.front()).max_health, cardinal.GetComponent<Statistics>(enemy.front()).health,true) });
 	
 	renderer->init(&cardinal);
 	animator->init(&cardinal);

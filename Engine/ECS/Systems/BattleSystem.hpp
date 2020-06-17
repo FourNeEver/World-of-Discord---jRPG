@@ -44,6 +44,7 @@ public:
 			auto& p_transform = coordinator->GetComponent<Transform>(*player);
 			auto& p_sprite = coordinator->GetComponent<Sprite>(*player);
 			auto& p_team = coordinator->GetComponent<Team>(*player);
+			auto& p_GUI = coordinator->GetComponent<GUI>(*player);
 
 			//Enemy components
 			auto& e_transform = coordinator->GetComponent<Transform>(entity);
@@ -52,60 +53,76 @@ public:
 			auto& e_collider = coordinator->GetComponent<Collider>(entity);
 			auto& e_animation = coordinator->GetComponent<Animated>(entity);
 			auto& e_team = coordinator->GetComponent<Team>(entity);
+			auto& e_GUI = coordinator->GetComponent<GUI>(entity);
 
 			p_animation.currentAnimation = "IDLE";
 			
 			if (e_collider.colliding.at("ACTION"))
 			{
-
+				//Time var
 				sf::Clock DeltaTime;
 				sf::Time Elapsed;
 				sf::Time Timer;
-				
+
+				//Mouse position
 				sf::Vector2f mousePosWiew;
 				
-				sf::RectangleShape background;
-				sf::Texture background_texture;
-				sf::Font font;
 
+				//Booleans
 				bool fighting = true;
-				bool action_avaible = true;
+				bool action_avaible = true;				
+
+
+				//Loading fonts
+				sf::Font font;
 				
-				background.setSize(sf::Vector2f(window->getSize()));
-				
-				sf::RectangleShape GUI_background(sf::Vector2f(window->getSize().x, 200));
-				GUI_background.setPosition(sf::Vector2f(0,window->getSize().y-GUI_background.getSize().y));
-				GUI_background.setFillColor(sf::Color::Blue);
-				GUI_background.setOutlineColor(sf::Color::Black);
-				GUI_background.setOutlineThickness(1);
-
-				background.setPosition(sf::Vector2f(0, -185));
-
-				Button attack_btn(1000, 650, 100, 50, &font, "Attack",
-					10,
-					sf::Color(255, 0, 0, 255),
-					sf::Color(255, 255, 255, 255),
-					sf::Color(255, 255, 255, 255),
-					sf::Color(255, 255, 255, 255),
-					sf::Color(255, 0, 0, 255),
-					sf::Color(255, 255, 255, 255));
-
 				if (!font.loadFromFile("Resources/Fonts/arial.ttf"))
 				{
 					throw("ERROR::BATTLE::COULD NOT LOAD FONT");
 				}
-
+				
+				///Loading backgrounds
+				//Main background
+				sf::RectangleShape background;
+				sf::Texture background_texture;
+				
 				if (!background_texture.loadFromFile("Resources/Images/Backgrounds/pixel_forest.png"))
 				{
 					throw"ERROR::BATTLE::FAIL_TO_LOAD_BACKGROUND_TEXTURE";
 				}
-
+				
+				background.setSize(sf::Vector2f(window->getSize()));
+				background.setPosition(sf::Vector2f(0, -185));
 				background.setTexture(&background_texture);
 				
+				//GUI Background
+				sf::RectangleShape GUI_background(sf::Vector2f(window->getSize().x, 200));
+				sf::Texture GUI_texture;
+				if (!GUI_texture.loadFromFile("Resources/Images/Backgrounds/action_gui.jpg"))
+				{
+					throw"ERROR::BATTLE::FAIL_TO_LOAD_BACKGROUND_TEXTURE";
+				}
+				GUI_background.setTexture(&GUI_texture);
+				GUI_background.setPosition(sf::Vector2f(0, window->getSize().y - GUI_background.getSize().y));
+				//GUI_background.setFillColor(sf::Color(140,140,60,255));
+				GUI_background.setOutlineColor(sf::Color::Black);
+				GUI_background.setOutlineThickness(1);
 
+				//Setting up buttons
+				Button attack_btn(1000, 650, 100, 50, &font, "Attack",
+					15,
+					sf::Color(255, 0, 0, 255),
+					sf::Color(255, 255, 255, 255),
+					sf::Color(255, 255, 255, 255),
+					sf::Color(255, 255, 255, 0),
+					sf::Color(255, 255, 255, 150),
+					sf::Color(255, 255, 255, 255));
+				
+				//Saving previous position
 				auto p_transform_copy = coordinator->GetComponent<Transform>(*player);
 				auto e_transform_copy = coordinator->GetComponent<Transform>(entity);
 
+				//Player team init
 				p_animation.currentAnimation = "IDLE_SIDE";
 				p_transform.position = sf::Vector2f(1100, 450);
 				int place = 1;
@@ -121,6 +138,7 @@ public:
 					place++;
 				}
 
+				//Enemy team init
 				e_animation.currentAnimation = "IDLE_SIDE";
 				e_transform.position = sf::Vector2f(200, 400);
 
@@ -136,48 +154,49 @@ public:
 					place++;
 				}
 
+				//Renderer update
 				renderer->update(coordinator);
-				
-				Bar player_health(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), p_sprite.sprite.getGlobalBounds(),sf::Vector2f(10,0), p_stats.max_health, p_stats.health,true);
-				Bar enemy_health(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 65), e_sprite.sprite.getGlobalBounds(), sf::Vector2f(-e_sprite.sprite.getGlobalBounds().width-5,0), e_stats.max_health, e_stats.health,true);
 
-				std::vector<Bar*> p_team_health;
-				std::vector<Bar*> e_team_health;
+
+				//GUI update
+				p_GUI.health_bar.update_origin(p_sprite.sprite.getGlobalBounds());
+				e_GUI.health_bar.update_origin(e_sprite.sprite.getGlobalBounds());
 				
 				for (auto& t : p_team.team)
 				{
-					auto& t_stats = coordinator->GetComponent<Statistics>(heroes->at(t));
-					auto& t_sprite = coordinator->GetComponent<Sprite>(heroes->at(t));
-					p_team_health.emplace_back(new Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), t_sprite.sprite.getGlobalBounds(), sf::Vector2f(10, 0), t_stats.max_health, t_stats.health, true));
+					coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update_origin(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite.getGlobalBounds());
 				}
 
 				for (auto& t : e_team.team)
 				{
-					auto& t_stats = coordinator->GetComponent<Statistics>(heroes->at(t));
-					auto& t_sprite = coordinator->GetComponent<Sprite>(heroes->at(t));
-					e_team_health.emplace_back(new Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), t_sprite.sprite.getGlobalBounds(), sf::Vector2f(-t_sprite.sprite.getGlobalBounds().width - 5, 0), t_stats.max_health, t_stats.health, true));
+					coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update_origin(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite.getGlobalBounds());
 				}
-				
+
+
+				//Fight loop
 				while (fighting)
 				{
-
+					//Timer reset
 					Elapsed = DeltaTime.restart();
-					
+
+					//Mouse Position Update
 					mousePosWiew = window->mapPixelToCoords(sf::Mouse::getPosition(*window));
 					//std::cout << mousePosWiew.x << " " << mousePosWiew.y << std::endl;
 
+					//Buttons update
 					attack_btn.update(mousePosWiew);
-					
+
+					//Input handling
+					//Debug input
 					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 						fighting = false;
-					
 					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 						e_stats.health -= 1;
 					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 						e_stats.health += 1;
+
 					
-					if (e_stats.health <= 0)
-						fighting = false;
+					//Actions
 
 					if(action_avaible)
 						if (attack_btn.isPressed())
@@ -195,34 +214,43 @@ public:
 							Timer = sf::Time::Zero;
 						}
 					}
-					
-					//Systems update
-					player_health.update(p_stats.health);
-					enemy_health.update(e_stats.health);
 
-					for (auto t : p_team_health)
+					//Fight ending
+					if (e_stats.health <= 0)
+						fighting = false;
+					
+					///Systems update
+
+					//Bars update
+					p_GUI.health_bar.update(p_stats.health);
+					e_GUI.health_bar.update(e_stats.health);
+
+					for (auto& t : p_team.team)
 					{
-						t->update(20);
+						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update(coordinator->GetComponent<Statistics>(heroes->at(t)).health);
 					}
 
-					for (auto t : e_team_health)
+					for (auto& t : e_team.team)
 					{
-						t->update(20);
+						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update(coordinator->GetComponent<Statistics>(heroes->at(t)).health);
 					}
 
-					
+					//Coordinator system update
 					
 					animator->update(coordinator, Elapsed.asSeconds());
 					renderer->update(coordinator);
 
 					
 
-					//Display
+					///Display
+					//Preparations
 					window->clear();
+					
+					//Background render
 					window->draw(background);
 
 
-
+					//Sprite render
 					window->draw(p_sprite.sprite);
 					window->draw(e_sprite.sprite);
 
@@ -234,34 +262,43 @@ public:
 					{
 						window->draw(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite);
 					}
-					
-					player_health.render(window);
-					enemy_health.render(window);
 
-					for(auto t:p_team_health)
+					//Bars Render
+					p_GUI.health_bar.render(window);
+					e_GUI.health_bar.render(window);
+
+					for (auto& t : p_team.team)
 					{
-						t->render(window);
+						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.render(window);
 					}
 
-					for (auto t : e_team_health)
+					for (auto& t : e_team.team)
 					{
-						t->render(window);
+						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.render(window);
 					}
 
+					//GUI Render
 					window->draw(GUI_background);
 					
 					attack_btn.render(window);
-					
+
+
+					//Display window
 					window->display();
 
+					//View set
 					window->setView(sf::View(sf::FloatRect(0, 0, 1280, 720)));
 
 					
 
 				}
+
+				//Killing enemy
 				e_collider.colliding.at("ACTION") = false;
 				e_stats.alive = false;
 
+
+				//Hiding team sprites
 				for (auto& t : p_team.team)
 				{
 					coordinator->GetComponent<Sprite>(heroes->at(t)).isVisible = false;
@@ -271,8 +308,11 @@ public:
 					coordinator->GetComponent<Sprite>(heroes->at(t)).isVisible = false;
 				}
 
+				//Revertiong positions
 				p_transform = p_transform_copy;
 				e_transform = e_transform_copy;
+				
+				//Stopping the player
 				p_physics.velocity = sf::Vector2f(0, 0);
 			}
 		}

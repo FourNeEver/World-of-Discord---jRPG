@@ -7,6 +7,7 @@ class Bar
 private:
 
 	sf::Vector2f size_;
+	sf::Vector2f offset_;
 	float fill_max;
 	float fill;
 	float change = 0;
@@ -22,7 +23,8 @@ public:
 	
 	void update(float amount);
 	void render(sf::RenderWindow* window);
-	
+
+	void update_origin(sf::FloatRect origin);
 };
 
               
