@@ -107,7 +107,7 @@ void GameState::ECSinit()
 	cardinal.AddComponent(player, Physical{ sf::Vector2f(0,0),10.f,5.0f,200.f,sf::Vector2f(0,0),true });
 	cardinal.AddComponent(player, Animated{ "IDLE","Resources/Animations/player.animate" });
 	cardinal.AddComponent(player, Collider{ "PLAYER",32,64,sf::Vector2f(0,32) });
-	cardinal.AddComponent(player, Statistics{ "Player","Human",1,0,10,60,60,7,5,10,7,6 });
+	cardinal.AddComponent(player, Statistics{ "Player","Human",1,0,10,60,60,7,5,10,7,6,ALLY });
 	cardinal.AddComponent(player, Team{ {1,2,3} });
 	cardinal.AddComponent(player, GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(player).sprite.getGlobalBounds(),sf::Vector2f(10,0), cardinal.GetComponent<Statistics>(player).max_health, cardinal.GetComponent<Statistics>(player).health,true) });
 	
@@ -120,7 +120,7 @@ void GameState::ECSinit()
 		while (hero_file >> ID >> name >> race >> lvl >> exp >> max_exp >> hp >> max_hp >> str >> lck >> mag >> def >> res)
 		{
 			heroes[ID] = cardinal.CreateEntity();
-			cardinal.AddComponent(heroes.at(ID), Statistics{ name,race,lvl,exp,max_exp,hp,max_hp,str,lck,mag,def,res });
+			cardinal.AddComponent(heroes.at(ID), Statistics{ name,race,lvl,exp,max_exp,hp,max_hp,str,lck,mag,def,res,ALLY });
 			cardinal.AddComponent(heroes.at(ID), Sprite{ textures.at(name),sf::IntRect(0, 0, 32, 32),false });
 			cardinal.AddComponent(heroes.at(ID), Transform{ sf::Vector2f(0,0),0,sf::Vector2f(2,2) });
 			cardinal.AddComponent(heroes.at(ID), GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(heroes.at(ID)).sprite.getGlobalBounds(), sf::Vector2f(10, 0), cardinal.GetComponent<Statistics>(heroes.at(ID)).max_health, cardinal.GetComponent<Statistics>(heroes.at(ID)).health, true) });
@@ -128,14 +128,14 @@ void GameState::ECSinit()
 	}
 
 	
-	enemy.emplace_back(cardinal.CreateEntity());
-	cardinal.AddComponent(enemy.front(), Transform{ sf::Vector2f(200,200),0,sf::Vector2f(2,2) });
-	cardinal.AddComponent(enemy.front(), Sprite{ textures["ENEMY_SHEET"] , sf::IntRect(0, 0, 32, 32),true });
-	cardinal.AddComponent(enemy.front(), Animated{ "IDLE","Resources/Animations/enemy.animate" });
-	cardinal.AddComponent(enemy.front(), Collider{ "ENEMY",64,64,sf::Vector2f(0,0) });
-	cardinal.AddComponent(enemy.front(), Statistics{ "Enemy","Human",1,0,0,40,40,5,3,6,4,3 });
-	cardinal.AddComponent(enemy.front(), Team{ {4} });
-	cardinal.AddComponent(enemy.front(), GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(enemy.front()).sprite.getGlobalBounds(),sf::Vector2f(-cardinal.GetComponent<Sprite>(enemy.front()).sprite.getGlobalBounds().width - 5,0), cardinal.GetComponent<Statistics>(enemy.front()).max_health, cardinal.GetComponent<Statistics>(enemy.front()).health,true) });
+	enemies.emplace_back(cardinal.CreateEntity());
+	cardinal.AddComponent(enemies.front(), Transform{ sf::Vector2f(200,200),0,sf::Vector2f(2,2) });
+	cardinal.AddComponent(enemies.front(), Sprite{ textures["ENEMY_SHEET"] , sf::IntRect(0, 0, 32, 32),true });
+	cardinal.AddComponent(enemies.front(), Animated{ "IDLE","Resources/Animations/enemy.animate" });
+	cardinal.AddComponent(enemies.front(), Collider{ "ENEMY",64,64,sf::Vector2f(0,0) });
+	cardinal.AddComponent(enemies.front(), Statistics{ "Enemy","Human",1,0,0,40,40,5,3,6,4,3,ENEMY });
+	cardinal.AddComponent(enemies.front(), Team{ {4} });
+	cardinal.AddComponent(enemies.front(), GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(enemies.front()).sprite.getGlobalBounds(),sf::Vector2f(-cardinal.GetComponent<Sprite>(enemies.front()).sprite.getGlobalBounds().width - 5,0), cardinal.GetComponent<Statistics>(enemies.front()).max_health, cardinal.GetComponent<Statistics>(enemies.front()).health,true) });
 	
 	renderer->init(&cardinal);
 	animator->init(&cardinal);
@@ -214,10 +214,13 @@ void GameState::update(const float& dt)
 	
 	collider->update(&cardinal);
 	controler->update(&cardinal, &keybinds);
-	physics->update(dt, &cardinal);
+	physics->update(&cardinal, dt);
 	animator->update(&cardinal, dt);
 	renderer->update(&cardinal);
-	battler->update(&cardinal, &player, window,renderer,animator,&heroes);
+	for (auto& e : enemies)
+	{
+		battler->update(&cardinal, &player,&e, window, renderer, animator, &heroes);
+	}
 		//animator->reset(&cardinal);
 
 	
@@ -225,12 +228,12 @@ void GameState::update(const float& dt)
 	
 	std::cout << cardinal.GetComponent<Animated>(player).currentAnimation << std::endl;
 
-	for (auto& e : enemy)
+	for (auto& e : enemies)
 	{
 		if (!cardinal.GetComponent<Statistics>(e).alive)
 		{
 			cardinal.DestroyEntity(e);
-			enemy.clear();
+			enemies.clear();
 		}
 	}
 

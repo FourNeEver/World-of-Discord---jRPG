@@ -1,5 +1,7 @@
 #pragma once
 #include "../../Libraries.hpp"
+enum FLAG { ENEMY, ALLY };
+
 
 struct Statistics
 {
@@ -16,6 +18,8 @@ struct Statistics
 	int magic;
 	int defense;
 	int resistance;
-
+	FLAG flag;
+	
 	bool alive = true;
+	
 };

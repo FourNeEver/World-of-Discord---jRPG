@@ -25,7 +25,7 @@ private:
 public:
 	Entity player;
 	std::map<int, Entity> heroes;
-	std::vector<Entity> enemy;
+	std::vector<Entity> enemies;
 	std::array<Entity,256> tile_map;
 
 	
