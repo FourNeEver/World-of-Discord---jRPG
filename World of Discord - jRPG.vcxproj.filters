@@ -39,7 +39,7 @@
     <ClCompile Include="Engine\Bar.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\GUI.cpp">
+    <ClCompile Include="Engine\BattleGUI.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
@@ -134,7 +134,7 @@
     <ClInclude Include="Engine\ECS\Components\GUI.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\GUI.hpp">
+    <ClInclude Include="Engine\BattleGUI.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../Bar.hpp"
-#include "../Button.hpp"
-#include "../Components.hpp"
-#include "../Core/Coordinator.hpp"
-#include "../GUI.hpp"
+//#include "../../Bar.hpp"
+//#include "../../Button.hpp"
+//#include "../Components.hpp"
+//#include "../Core/Coordinator.hpp"
+#include "../../BattleGUI.hpp"
 
 
 class BattleSystem
@@ -139,6 +139,7 @@ public:
 			GUI_background.setOutlineColor(sf::Color::Black);
 			GUI_background.setOutlineThickness(1);
 
+			
 			//Setting up buttons
 			Button attack_btn(1000, 650, 100, 50, &font, "Attack",
 				15,
@@ -220,10 +221,10 @@ public:
 				{
 					action_queue.emplace_back(&heroes->at(t));
 				}
-
-				BattleGUI battle_gui(coordinator, window, font, background_texture, action_queue);
 				
 				compare_agility(coordinator, action_queue);
+
+				BattleGUI battle_gui(coordinator, window, &font, background_texture, action_queue);
 
 				//std::cout << "Battle order: " << std::endl;
 				//for (auto& hero : action_queue)

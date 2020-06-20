@@ -159,7 +159,7 @@
     <ClCompile Include="Engine\States\MainMenuState.cpp" />
     <ClCompile Include="Engine\States\GameState.cpp" />
     <ClCompile Include="Engine\States\SettingState.cpp" />
-    <ClCompile Include="Engine\GUI.cpp" />
+    <ClCompile Include="Engine\BattleGUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Bar.hpp" />
@@ -192,7 +192,7 @@
     <ClInclude Include="Engine\States\MainMenuState.hpp" />
     <ClInclude Include="Engine\States\GameState.hpp" />
     <ClInclude Include="Engine\States\SettingState.hpp" />
-    <ClInclude Include="Engine\GUI.hpp" />
+    <ClInclude Include="Engine\BattleGUI.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
