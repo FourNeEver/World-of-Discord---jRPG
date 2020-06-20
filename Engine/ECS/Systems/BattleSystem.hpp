@@ -4,6 +4,7 @@
 #include "../Button.hpp"
 #include "../Components.hpp"
 #include "../Core/Coordinator.hpp"
+#include "../GUI.hpp"
 
 
 class BattleSystem
@@ -180,7 +181,7 @@ public:
 					coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(e_transform.position.x, e_transform.position.y - (50 * place));
 				else
 					coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(e_transform.position.x - 70, e_transform.position.y - (50 * place));
-				coordinator->GetComponent<Statistics>(heroes->at(t)).flag = ENEMY;
+				coordinator->GetComponent<Statistics>(heroes->at(t)).flag = "ENEMY";
 				std::cout << coordinator->GetComponent<Statistics>(heroes->at(t)).name << std::endl;
 				place++;
 			}
@@ -220,6 +221,8 @@ public:
 					action_queue.emplace_back(&heroes->at(t));
 				}
 
+				BattleGUI battle_gui(coordinator, window, font, background_texture, action_queue);
+				
 				compare_agility(coordinator, action_queue);
 
 				//std::cout << "Battle order: " << std::endl;
@@ -294,6 +297,8 @@ public:
 						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update(coordinator->GetComponent<Statistics>(heroes->at(t)).health);
 					}
 
+					battle_gui.update(mousePosWiew);
+					
 					//Coordinator system update
 
 					animator->update(coordinator, Elapsed.asSeconds());
@@ -340,6 +345,8 @@ public:
 					window->draw(GUI_background);
 
 					attack_btn.render(window);
+
+					battle_gui.render(window);
 
 
 					//Display window
