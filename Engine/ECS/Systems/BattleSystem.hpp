@@ -246,17 +246,17 @@ public:
 					//Debug input
 					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 						fighting = false;
-					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-						e_stats.health -= 1;
-					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-						e_stats.health += 1;
 					
-
+					
 					//Pulling current hero stats;
 					current_hero = action_queue.begin();
 
 					auto& h_stats = coordinator->GetComponent<Statistics>(**current_hero);
+					auto& h_sprite = coordinator->GetComponent<Sprite>(**current_hero);
 
+
+
+					
 					//Actions
 					if (h_stats.flag=="ALLY")
 					{
@@ -289,21 +289,47 @@ public:
 						}
 					}
 
+
 					//Killing heroes
-					for(auto& l:living)
+					for (auto& l : living)
 					{
-						if(coordinator->GetComponent<Statistics>(*l).health<=0)
+						if (coordinator->GetComponent<Statistics>(*l).health <= 0)
 						{
 							living.remove(l);
 							break;
 						}
 					}
-
+					//Removing dead heroes from queue
+					for (auto& a : action_queue)
+					{
+						if (coordinator->GetComponent<Statistics>(*a).health <= 0)
+						{
+							action_queue.remove(a);
+							break;
+						}
+					}
 					
+					//Removing buttons
+					//if (coordinator->GetComponent<Statistics>(*enemy).health <= 0)
+					//	battle_gui.kill(0);
+					//for (auto& e : e_team.team)
+					//{
+					//	if (coordinator->GetComponent<Statistics>(heroes->at(e)).health <= 0)
+					//		battle_gui.kill(e);
+					//}
+
 					//Fight ending
-					if (e_stats.health <= 0)
+					bool enemy_alive = false;
+					if (e_stats.health > 0)
+						enemy_alive = true;
+					for (auto& e : e_team.team)
+					{
+						if (coordinator->GetComponent<Statistics>(heroes->at(e)).health > 0)
+							enemy_alive = true;
+					}
+					if (!enemy_alive)
 						fighting = false;
-		
+
 
 					///Systems update
 
@@ -314,7 +340,7 @@ public:
 					}
 					
 					//GUI Update
-					battle_gui.update(mousePosWiew,h_stats.name);
+					battle_gui.update(mousePosWiew,h_stats.name,h_sprite.sprite.getGlobalBounds(),h_stats.flag);
 					
 					//Coordinator system update
 

@@ -37,6 +37,7 @@ class BattleGUI
 	sf::Texture texture_background;
 	sf::Text current_attacker;
 	std::map<int, sf::ConvexShape> target_pointer;
+	sf::ConvexShape action_pointer;
 	
 	std::list<Entity*> heroes_list;
 	std::vector<StatisticGUI> heroes_stats;
@@ -59,7 +60,9 @@ public:
 	
 	BattleGUI(Coordinator* coordinator,sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites, std::map<int, Entity>* heroes, Entity* ene);
 	
-	void update(sf::Vector2f mousePos, std::string current);
+	void update(sf::Vector2f mousePos, std::string current_name, sf::FloatRect origin,std::string flag);
 	void render(sf::RenderWindow* window);
+
+	void kill(int ID);
 };
 

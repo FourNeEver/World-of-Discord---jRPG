@@ -164,16 +164,43 @@ BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Fon
 		target_pointer.at(e).setFillColor(sf::Color::Red);
 		target_pointer.at(e).setPosition(sf::Vector2f(origin.left + origin.width /2,origin.top + origin.height + 2));
 	}
+
+	origin = coordinator->GetComponent<Sprite>(*heroes_list.front()).sprite.getGlobalBounds();
+	action_pointer = sf::ConvexShape(3);
+	action_pointer.setPoint(0, sf::Vector2f(0.0, 0.0));
+	action_pointer.setPoint(1, sf::Vector2f(15.0, 15.0));
+	action_pointer.setPoint(2, sf::Vector2f(-15.0, 15.0));
+	action_pointer.setRotation(180);
+	action_pointer.setFillColor(sf::Color::Green);
+	action_pointer.setPosition(sf::Vector2f(origin.left + origin.width / 2, origin.top - 2));
+
 }
 
-void BattleGUI::update(sf::Vector2f mousePos, std::string current)
+void BattleGUI::update(sf::Vector2f mousePos, std::string current_name, sf::FloatRect origin, std::string flag)
 {
 
-	current_attacker.setString(current);
+	current_attacker.setString(current_name);
+
+	action_pointer.setPosition(sf::Vector2f(origin.left + origin.width / 2, origin.top - 2));
+
 	
 	for(auto& s:heroes_stats)
 	{
 		s.update(mousePos);
+	}
+	if(flag == "ENEMY")
+	{
+		attack->disable();
+		ability->disable();
+		item->disable();
+		limit->disable();
+	}
+	else
+	{
+		attack->enable();
+		ability->enable();
+		item->enable();
+		limit->enable();
 	}
 	attack->update(mousePos);
 	ability->update(mousePos);
@@ -215,6 +242,7 @@ void BattleGUI::render(sf::RenderWindow* window)
 	item->render(window);
 	limit->render(window);
 	window->draw(current_attacker);
+	window->draw(action_pointer);
 	if(isAttacking)
 	{
 		for(auto& e:enemy_ptr)
@@ -226,4 +254,11 @@ void BattleGUI::render(sf::RenderWindow* window)
 			}
 		}
 	}
+}
+
+void BattleGUI::kill(int ID)
+{
+	delete enemy_ptr.at(ID);
+	enemy_ptr.erase(ID);
+	target_pointer.erase(ID);
 }
