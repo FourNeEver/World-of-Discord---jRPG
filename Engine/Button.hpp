@@ -22,7 +22,7 @@ private:
 	sf::Color hoverColor;
 	sf::Color activeColor;
 
-
+	bool isActive = true;
 
 public:
 
@@ -36,10 +36,14 @@ public:
 
 	//Accessors
 	const bool isPressed() const;
+	const bool isHovered() const;
 
 	//Functions
 	void update(const sf::Vector2f mousePos);
 	void render(sf::RenderTarget* target);
 
 	void change(std::string new_text);
+
+	void disable();
+	void enable();
 };

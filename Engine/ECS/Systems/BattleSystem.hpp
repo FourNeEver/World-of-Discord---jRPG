@@ -141,14 +141,14 @@ public:
 
 			
 			//Setting up buttons
-			Button attack_btn(1000, 650, 100, 50, &font, "Attack",
-				15,
-				sf::Color(255, 0, 0, 255),
-				sf::Color(255, 255, 255, 255),
-				sf::Color(255, 255, 255, 255),
-				sf::Color(255, 255, 255, 0),
-				sf::Color(255, 255, 255, 150),
-				sf::Color(255, 255, 255, 255));
+			//Button attack_btn(1000, 650, 100, 50, &font, "Attack",
+			//	15,
+			//	sf::Color(255, 0, 0, 255),
+			//	sf::Color(255, 255, 255, 255),
+			//	sf::Color(255, 255, 255, 255),
+			//	sf::Color(255, 255, 255, 0),
+			//	sf::Color(255, 255, 255, 150),
+			//	sf::Color(255, 255, 255, 255));
 
 			//Saving previous position
 			auto p_transform_copy = coordinator->GetComponent<Transform>(*player);
@@ -204,27 +204,29 @@ public:
 			{
 				coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update_origin(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite.getGlobalBounds());
 			}
-
+			
+			std::list<Entity*> living;
+			living.emplace_back(player);
+			living.emplace_back(enemy);
+			for (auto& t : p_team.team)
+			{
+				living.emplace_back(&heroes->at(t));
+			}
+			for (auto& t : e_team.team)
+			{
+				living.emplace_back(&heroes->at(t));
+			}
 
 			//Fight loop
 			while (fighting)
 			{
 				//Queue set up
-				std::list<Entity*> action_queue;
-				action_queue.emplace_back(player);
-				action_queue.emplace_back(enemy);
-				for (auto& t : p_team.team)
-				{
-					action_queue.emplace_back(&heroes->at(t));
-				}
-				for (auto& t : e_team.team)
-				{
-					action_queue.emplace_back(&heroes->at(t));
-				}
+				std::list<Entity*> action_queue = living;
 				
 				compare_agility(coordinator, action_queue);
 
-				BattleGUI battle_gui(coordinator, window, &font, background_texture, action_queue);
+
+				BattleGUI battle_gui(coordinator, window, &font, background_texture, action_queue,heroes,enemy);
 
 				//std::cout << "Battle order: " << std::endl;
 				//for (auto& hero : action_queue)
@@ -256,49 +258,63 @@ public:
 					auto& h_stats = coordinator->GetComponent<Statistics>(**current_hero);
 
 					//Actions
-					if (action_avaible)
-						if (attack_btn.isPressed())
+					if (h_stats.flag=="ALLY")
+					{
+						if (battle_gui.enemy_ptr.at(0)->isPressed())
 						{
-							phys_attack(coordinator, h_stats, e_stats);
+							phys_attack(coordinator, h_stats, coordinator->GetComponent<Statistics>(*enemy));
 							action_avaible = false;
+							action_queue.pop_front();
 						}
-					if (!action_avaible)
+						for (auto& e : e_team.team)
+						{
+							if (battle_gui.enemy_ptr.at(e)->isPressed())
+							{
+
+								phys_attack(coordinator, h_stats, coordinator->GetComponent<Statistics>(heroes->at(e)));
+								action_avaible = false;
+								action_queue.pop_front();
+							}
+						}
+					}
+					if (h_stats.flag=="ENEMY")
 					{
 						Timer += DeltaTime.getElapsedTime();
 						if (Timer.asMicroseconds() > 20000)
 						{
-							phys_attack(coordinator, e_stats, h_stats);
+							phys_attack(coordinator, h_stats, p_stats);
 							action_avaible = true;
 							Timer = sf::Time::Zero;
 							action_queue.pop_front();
 						}
 					}
 
+					//Killing heroes
+					for(auto& l:living)
+					{
+						if(coordinator->GetComponent<Statistics>(*l).health<=0)
+						{
+							living.remove(l);
+							break;
+						}
+					}
+
+					
 					//Fight ending
 					if (e_stats.health <= 0)
 						fighting = false;
+		
 
 					///Systems update
 
-					//Buttons update
-					attack_btn.update(mousePosWiew);
-
-
 					//Bars update
-					p_GUI.health_bar.update(p_stats.health);
-					e_GUI.health_bar.update(e_stats.health);
-
-					for (auto& t : p_team.team)
+					for (auto& l : living)
 					{
-						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update(coordinator->GetComponent<Statistics>(heroes->at(t)).health);
+						coordinator->GetComponent<GUI>(*l).health_bar.update(coordinator->GetComponent<Statistics>(*l).health);
 					}
-
-					for (auto& t : e_team.team)
-					{
-						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update(coordinator->GetComponent<Statistics>(heroes->at(t)).health);
-					}
-
-					battle_gui.update(mousePosWiew);
+					
+					//GUI Update
+					battle_gui.update(mousePosWiew,h_stats.name);
 					
 					//Coordinator system update
 
@@ -316,46 +332,29 @@ public:
 
 
 					//Sprite render
-					window->draw(p_sprite.sprite);
-					window->draw(e_sprite.sprite);
-
-					for (auto& t : p_team.team)
+					for(auto& l:living)
 					{
-						window->draw(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite);
-					}
-					for (auto& t : e_team.team)
-					{
-						window->draw(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite);
+						window->draw(coordinator->GetComponent<Sprite>(*l).sprite);
 					}
 
 					//Bars Render
-					p_GUI.health_bar.render(window);
-					e_GUI.health_bar.render(window);
-
-					for (auto& t : p_team.team)
+					for (auto& l : living)
 					{
-						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.render(window);
-					}
-
-					for (auto& t : e_team.team)
-					{
-						coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.render(window);
-					}
+						coordinator->GetComponent<GUI>(*l).health_bar.render(window);
+					}	
 
 					//GUI Render
 					window->draw(GUI_background);
 
-					attack_btn.render(window);
-
 					battle_gui.render(window);
-
-
+					
 					//Display window
 					window->display();
 
 					//View set
 					window->setView(sf::View(sf::FloatRect(0, 0, 1280, 720)));
 
+					
 				}
 
 			}

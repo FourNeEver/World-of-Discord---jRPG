@@ -47,6 +47,14 @@ const bool Button::isPressed() const
 	return false;
 }
 
+
+const bool Button::isHovered() const
+{
+	if (this->buttonState == BTN_HOVER)
+		return true;
+
+	return false;
+}
 //Functions
 
 void Button::update(const sf::Vector2f mousePos)
@@ -56,7 +64,7 @@ void Button::update(const sf::Vector2f mousePos)
 
 	//Hover
 
-	if (this->shape.getGlobalBounds().contains(mousePos))
+	if (this->shape.getGlobalBounds().contains(mousePos) && isActive)
 	{
 		this->buttonState = BTN_HOVER;
 
@@ -92,11 +100,24 @@ void Button::update(const sf::Vector2f mousePos)
 
 void Button::render(sf::RenderTarget* target)
 {
-	target->draw(this->shape);
-	target->draw(this->text);
+	if (isActive)
+	{
+		target->draw(this->shape);
+		target->draw(this->text);
+	}
 }
 
 void Button::change(std::string new_text)
 {
 	text.setString(new_text);
+}
+
+void Button::disable()
+{
+	isActive = false;
+}
+
+void Button::enable()
+{
+	isActive = true;
 }

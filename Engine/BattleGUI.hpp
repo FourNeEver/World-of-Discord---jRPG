@@ -7,6 +7,7 @@
 class StatisticGUI
 {
 	sf::RectangleShape shape;
+	sf::FloatRect origin;
 	
 	sf::Text name;
 	sf::Text race;
@@ -34,15 +35,31 @@ class BattleGUI
 	sf::Font* font;
 	sf::RectangleShape background;
 	sf::Texture texture_background;
+	sf::Text current_attacker;
+	std::map<int, sf::ConvexShape> target_pointer;
+	
 	std::list<Entity*> heroes_list;
 	std::vector<StatisticGUI> heroes_stats;
+	std::map<int, Entity>* all_heroes;
+	Entity* enemy;
 
 
 
 public:
-	BattleGUI(Coordinator* coordinator,sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites);
+
+	Button* attack;
+	Button* ability;
+	Button* item;
+	Button* limit;
+	std::map<int, Button*> enemy_ptr;
+
+	bool isAttacking = false;
+
 	
-	void update(sf::Vector2f mousePos);
+	
+	BattleGUI(Coordinator* coordinator,sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites, std::map<int, Entity>* heroes, Entity* ene);
+	
+	void update(sf::Vector2f mousePos, std::string current);
 	void render(sf::RenderWindow* window);
 };
 
