@@ -39,7 +39,7 @@ public:
 	}
 
 	
-	void phys_attack(Coordinator* coordinator, Statistics& a_stats, Statistics& d_stats)
+	void phys_attack(Statistics& a_stats, Statistics& d_stats)
 	{
 		srand(time(NULL));
 		
@@ -58,6 +58,8 @@ public:
 			std::cout <<a_stats.name<< " attacks " <<d_stats.name<<" for "<< damage << " damage" << std::endl;
 		}
 	}
+	
+	void use_ability(Ability& ability,Statistics& a_stats, Statistics& d_stats);
 	
 	void update(Coordinator* coordinator, Entity* player, Entity* enemy, sf::RenderWindow* window,
 		std::shared_ptr<RenderSystem> renderer, std::shared_ptr<AnimationSystem> animator, std::map<int, Entity>* heroes, std::map<int, Ability>* abilities)
@@ -140,17 +142,6 @@ public:
 			GUI_background.setOutlineColor(sf::Color::Black);
 			GUI_background.setOutlineThickness(1);
 
-			
-			//Setting up buttons
-			//Button attack_btn(1000, 650, 100, 50, &font, "Attack",
-			//	15,
-			//	sf::Color(255, 0, 0, 255),
-			//	sf::Color(255, 255, 255, 255),
-			//	sf::Color(255, 255, 255, 255),
-			//	sf::Color(255, 255, 255, 0),
-			//	sf::Color(255, 255, 255, 150),
-			//	sf::Color(255, 255, 255, 255));
-
 			//Saving previous position
 			auto p_transform_copy = coordinator->GetComponent<Transform>(*player);
 			auto e_transform_copy = coordinator->GetComponent<Transform>(*enemy);
@@ -229,7 +220,7 @@ public:
 				compare_agility(coordinator, action_queue);
 
 
-				BattleGUI battle_gui(coordinator, window, &font, background_texture, action_queue,heroes,enemy,abilities);
+				BattleGUI battle_gui(coordinator, window, &font, background_texture, action_queue,heroes,enemy,player,abilities);
 
 				//std::cout << "Battle order: " << std::endl;
 				//for (auto& hero : action_queue)
@@ -265,7 +256,7 @@ public:
 					{
 						if (battle_gui.enemy_ptr.at(0)->isPressed())
 						{
-							phys_attack(coordinator, h_stats, coordinator->GetComponent<Statistics>(*enemy));
+							phys_attack(h_stats, coordinator->GetComponent<Statistics>(*enemy));
 							action_avaible = false;
 							action_queue.pop_front();
 						}
@@ -274,7 +265,7 @@ public:
 							if (battle_gui.enemy_ptr.at(e)->isPressed())
 							{
 
-								phys_attack(coordinator, h_stats, coordinator->GetComponent<Statistics>(heroes->at(e)));
+								phys_attack(h_stats, coordinator->GetComponent<Statistics>(heroes->at(e)));
 								action_avaible = false;
 								action_queue.pop_front();
 							}
@@ -285,7 +276,7 @@ public:
 						Timer += DeltaTime.getElapsedTime();
 						if (Timer.asMicroseconds() > 20000)
 						{
-							phys_attack(coordinator, h_stats, p_stats);
+							phys_attack(h_stats, p_stats);
 							action_avaible = true;
 							Timer = sf::Time::Zero;
 							action_queue.pop_front();

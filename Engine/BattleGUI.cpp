@@ -69,8 +69,8 @@ void StatisticGUI::render(sf::RenderWindow* window)
 	}
 }
 
-BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites, std::map<int, Entity>* heroes, Entity* ene, std::map<int, Ability>* all_abs)
-	: font(f), texture_background(background_tex),heroes_list(entites),all_heroes(heroes),all_abilities(all_abs),enemy(ene)
+BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites, std::map<int, Entity>* heroes, Entity* ene, Entity* playr,std::map<int, Ability>* all_abs)
+	: font(f), texture_background(background_tex),heroes_list(entites),all_heroes(heroes),all_abilities(all_abs),enemy(ene),player(playr)
 {
 	background.setTexture(&texture_background);
 
@@ -117,9 +117,7 @@ BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Fon
 		sf::Color(255, 255, 255, 0),
 		sf::Color(255, 255, 255, 150),
 		sf::Color(255, 255, 255, 255));
-
-	int counter = 1;
-
+	
 	enemy_ptr.try_emplace(0, new Button(300, 550, 175, 60, font, coordinator->GetComponent<Statistics>(*enemy).name,
 		15,
 		sf::Color(255, 0, 0, 255),
@@ -128,10 +126,17 @@ BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Fon
 		sf::Color(255, 255, 255, 0),
 		sf::Color(255, 255, 255, 150),
 		sf::Color(255, 255, 255, 255)));
-	
+
+	float x = 1;
+	float y = 0;
 	for(auto& e :coordinator->GetComponent<Team>(*enemy).team)
 	{
-		enemy_ptr.try_emplace(e, new Button(300+(200*counter), 550, 175, 60, font, coordinator->GetComponent<Statistics>(all_heroes->at(e)).name,
+		if (x > 1)
+		{
+			x -= 2;
+			y++;
+		}
+		enemy_ptr.try_emplace(e, new Button(300.f+(200.f*x), 550.f+(75.f*y), 175, 60, font, coordinator->GetComponent<Statistics>(all_heroes->at(e)).name,
 			15,
 			sf::Color(255, 0, 0, 255),
 			sf::Color(255, 255, 255, 255),
@@ -139,12 +144,48 @@ BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Fon
 			sf::Color(255, 255, 255, 0),
 			sf::Color(255, 255, 255, 150),
 			sf::Color(255, 255, 255, 255)));
-		counter++;
+		x++;
 	}
 
+	ally_ptr.try_emplace(0, new Button(300, 550, 175, 60, font, coordinator->GetComponent<Statistics>(*player).name,
+		15,
+		sf::Color(255, 0, 0, 255),
+		sf::Color(255, 255, 255, 255),
+		sf::Color(255, 255, 255, 255),
+		sf::Color(255, 255, 255, 0),
+		sf::Color(255, 255, 255, 150),
+		sf::Color(255, 255, 255, 255)));
+
+	x = 1;
+	y = 0;
+	for (auto& e : coordinator->GetComponent<Team>(*player).team)
+	{
+		if (x > 1)
+		{
+			x -= 2;
+			y++;
+		}
+		ally_ptr.try_emplace(e, new Button(300.f + (200.f * x), 550.f + (75.f * y), 175, 60, font, coordinator->GetComponent<Statistics>(all_heroes->at(e)).name,
+			15,
+			sf::Color(255, 0, 0, 255),
+			sf::Color(255, 255, 255, 255),
+			sf::Color(255, 255, 255, 255),
+			sf::Color(255, 255, 255, 0),
+			sf::Color(255, 255, 255, 150),
+			sf::Color(255, 255, 255, 255)));
+		x++;
+	}
+	
 	for(unsigned int i=0;i<4;i++)
 	{
-		ability_ptr.emplace_back( new Button(300 + (200 * i), 550, 175, 60, font, "ERROR::MISSING_ABILITY_INFO",
+		x = i;
+		y = 0;
+		if(x>1)
+		{
+			x -= 2;
+			y++;
+		}
+		ability_ptr.emplace_back(new Button(300.f + (200.f * x), 550.f + (75.f*y), 175, 60, font, "ERROR::MISSING_ABILITY_INFO",
 			15,
 			sf::Color(255, 0, 0, 255),
 			sf::Color(255, 255, 255, 255),
@@ -232,12 +273,45 @@ void BattleGUI::update(sf::Vector2f mousePos, std::string current_name, sf::Floa
 				ability_ptr.at(i)->activate();
 				ability_ptr.at(i)->change(all_abilities->at(abilities_IDs.at(i)).name);
 			}
+			if (ability_ptr.at(i)->isPressed() && choosingAbility)
+			{
+				usingAbility = true;
+				choosingAbility = false;
+
+				target = all_abilities->at(abilities_IDs.at(i)).target;
+
+				if (target == "ENEMY")
+				{
+					for (auto& e : enemy_ptr)
+					{
+						e.second->activate();
+					}
+				}
+			}
+			
+		}
+		
+	}
+
+	
+	for (auto& e : ally_ptr)
+	{
+		e.second->update(mousePos);
+		if (usingAbility && target == "ALLY")
+		{
+			e.second->activate();
+			if (e.second->isPressed())
+			{
+				usingAbility = false;
+				e.second->deactivate();
+			}
 		}
 	}
+	
 	for (auto& e : enemy_ptr)
 	{
 		e.second->update(mousePos);
-		if (attack->isPressed())
+		if (attack->isPressed() )
 		{
 			isAttacking = true;
 
@@ -252,13 +326,20 @@ void BattleGUI::update(sf::Vector2f mousePos, std::string current_name, sf::Floa
 				e.second->deactivate();
 			}
 		}
-		else
+		if (usingAbility && target == "ENEMY")
+		{
+			if (e.second->isPressed())
+			{
+				usingAbility = false;
+				e.second->deactivate();
+			}
+		}
+
+		if(!isAttacking && !usingAbility)
 		{
 			e.second->deactivate();
 		}
 	}
-
-	
 }
 
 void BattleGUI::render(sf::RenderWindow* window)
@@ -289,6 +370,31 @@ void BattleGUI::render(sf::RenderWindow* window)
 			{
 				window->draw(target_pointer.at(e.first));
 			}
+		}
+	}
+	if(usingAbility)
+	{
+		if(target=="ENEMY")
+		{
+			for (auto& e : enemy_ptr)
+			{
+				e.second->render(window);
+				if (e.second->isHovered())
+				{
+					window->draw(target_pointer.at(e.first));
+				}
+			}
+		}
+		if(target=="ALLY")
+		{
+			for (auto& e : ally_ptr)
+			{
+				e.second->render(window);
+			}
+		}
+		if(target=="SELF")
+		{
+			ally_ptr.at(0)->render(window);
 		}
 	}
 }

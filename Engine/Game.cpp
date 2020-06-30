@@ -18,7 +18,7 @@ void Game::initialize()
 
     ifs.close();
 	
-    window = new sf::RenderWindow(sf::VideoMode(1280, 720), "Test");
+    window = new sf::RenderWindow(sf::VideoMode(1280, 720), "World of Discord 0.0002");
 
     states.push(new MainMenuState(window, &states,&supportedKeys));
 	
