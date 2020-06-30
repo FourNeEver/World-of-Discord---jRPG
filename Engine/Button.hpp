@@ -23,6 +23,7 @@ private:
 	sf::Color activeColor;
 
 	bool isActive = true;
+	bool isEnabled = true;
 
 public:
 
@@ -44,6 +45,9 @@ public:
 
 	void change(std::string new_text);
 
+	void activate();
+	void deactivate();
+	
 	void disable();
 	void enable();
 };

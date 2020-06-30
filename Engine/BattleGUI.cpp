@@ -69,8 +69,8 @@ void StatisticGUI::render(sf::RenderWindow* window)
 	}
 }
 
-BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites, std::map<int, Entity>* heroes, Entity* ene)
-	: font(f), texture_background(background_tex),heroes_list(entites),all_heroes(heroes),enemy(ene)
+BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites, std::map<int, Entity>* heroes, Entity* ene, std::map<int, Ability>* all_abs)
+	: font(f), texture_background(background_tex),heroes_list(entites),all_heroes(heroes),all_abilities(all_abs),enemy(ene)
 {
 	background.setTexture(&texture_background);
 
@@ -142,6 +142,18 @@ BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Fon
 		counter++;
 	}
 
+	for(unsigned int i=0;i<4;i++)
+	{
+		ability_ptr.emplace_back( new Button(300 + (200 * i), 550, 175, 60, font, "ERROR::MISSING_ABILITY_INFO",
+			15,
+			sf::Color(255, 0, 0, 255),
+			sf::Color(255, 255, 255, 255),
+			sf::Color(255, 255, 255, 255),
+			sf::Color(255, 255, 255, 0),
+			sf::Color(255, 255, 255, 150),
+			sf::Color(255, 255, 255, 255)));
+	}
+	
 	current_attacker = sf::Text("Missing name", *font, 20);
 	current_attacker.setPosition(sf::Vector2f(window->getSize().x / 2,525));
 	current_attacker.setFillColor(sf::Color::Black);
@@ -176,7 +188,7 @@ BattleGUI::BattleGUI(Coordinator* coordinator, sf::RenderWindow* window, sf::Fon
 
 }
 
-void BattleGUI::update(sf::Vector2f mousePos, std::string current_name, sf::FloatRect origin, std::string flag)
+void BattleGUI::update(sf::Vector2f mousePos, std::string current_name, sf::FloatRect origin, std::string flag, std::vector<int> abilities_IDs)
 {
 
 	current_attacker.setString(current_name);
@@ -190,24 +202,38 @@ void BattleGUI::update(sf::Vector2f mousePos, std::string current_name, sf::Floa
 	}
 	if(flag == "ENEMY")
 	{
-		attack->disable();
-		ability->disable();
-		item->disable();
-		limit->disable();
+		attack->deactivate();
+		ability->deactivate();
+		item->deactivate();
+		limit->deactivate();
 	}
 	else
 	{
-		attack->enable();
-		ability->enable();
-		item->enable();
-		limit->enable();
+		attack->activate();
+		ability->activate();
+		item->activate();
+		limit->activate();
 	}
 	attack->update(mousePos);
 	ability->update(mousePos);
 	item->update(mousePos);
 	limit->update(mousePos);
 
+	if (!abilities_IDs.empty())
+	{
+		for (unsigned int i = 0; i < abilities_IDs.size(); i++)
+		{
+			ability_ptr.at(i)->update(mousePos);
 
+			if (ability->isPressed())
+			{
+				choosingAbility = true;
+
+				ability_ptr.at(i)->activate();
+				ability_ptr.at(i)->change(all_abilities->at(abilities_IDs.at(i)).name);
+			}
+		}
+	}
 	for (auto& e : enemy_ptr)
 	{
 		e.second->update(mousePos);
@@ -215,7 +241,7 @@ void BattleGUI::update(sf::Vector2f mousePos, std::string current_name, sf::Floa
 		{
 			isAttacking = true;
 
-			e.second->enable();
+			e.second->activate();
 
 		}
 		if (isAttacking)
@@ -223,8 +249,12 @@ void BattleGUI::update(sf::Vector2f mousePos, std::string current_name, sf::Floa
 			if (e.second->isPressed())
 			{
 				isAttacking = false;
-				e.second->disable();
+				e.second->deactivate();
 			}
+		}
+		else
+		{
+			e.second->deactivate();
 		}
 	}
 
@@ -243,6 +273,13 @@ void BattleGUI::render(sf::RenderWindow* window)
 	limit->render(window);
 	window->draw(current_attacker);
 	window->draw(action_pointer);
+	if(choosingAbility)
+	{
+		for(auto& b:ability_ptr)
+		{
+			b->render(window);
+		}
+	}
 	if(isAttacking)
 	{
 		for(auto& e:enemy_ptr)
@@ -254,11 +291,4 @@ void BattleGUI::render(sf::RenderWindow* window)
 			}
 		}
 	}
-}
-
-void BattleGUI::kill(int ID)
-{
-	delete enemy_ptr.at(ID);
-	enemy_ptr.erase(ID);
-	target_pointer.erase(ID);
 }

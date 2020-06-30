@@ -68,7 +68,7 @@ void Game::update()
         window->close();
     }
 
-    std::cout << Elapsed.asSeconds() << std::endl;
+    //std::cout << Elapsed.asSeconds() << std::endl;
 }
 
 void Game::render()

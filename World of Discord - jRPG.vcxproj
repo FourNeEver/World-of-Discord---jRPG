@@ -193,6 +193,7 @@
     <ClInclude Include="Engine\States\GameState.hpp" />
     <ClInclude Include="Engine\States\SettingState.hpp" />
     <ClInclude Include="Engine\BattleGUI.hpp" />
+    <ClInclude Include="Engine\Fight.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

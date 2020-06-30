@@ -18,6 +18,7 @@ private:
 	std::shared_ptr<BattleSystem> battler;
 
 	std::map<std::string, sf::Texture> textures;
+	std::map<int, Ability> all_abilities;
 
 	void ECSinit();
 	void initialize();

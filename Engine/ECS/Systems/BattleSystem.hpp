@@ -60,7 +60,7 @@ public:
 	}
 	
 	void update(Coordinator* coordinator, Entity* player, Entity* enemy, sf::RenderWindow* window,
-		std::shared_ptr<RenderSystem> renderer, std::shared_ptr<AnimationSystem> animator, std::map<int, Entity>* heroes)
+		std::shared_ptr<RenderSystem> renderer, std::shared_ptr<AnimationSystem> animator, std::map<int, Entity>* heroes, std::map<int, Ability>* abilities)
 	{
 
 		//for (auto const& entity : mEntities)
@@ -88,6 +88,7 @@ public:
 		if (e_collider.colliding.at("ACTION"))
 		{
 			//Time var
+			sf::Clock loading;
 			sf::Clock DeltaTime;
 			sf::Time Elapsed;
 			sf::Time Timer;
@@ -217,6 +218,8 @@ public:
 				living.emplace_back(&heroes->at(t));
 			}
 
+			std::cout << "Battle initialized in " << loading.getElapsedTime().asSeconds() << " seconds" << std::endl;
+			
 			//Fight loop
 			while (fighting)
 			{
@@ -226,7 +229,7 @@ public:
 				compare_agility(coordinator, action_queue);
 
 
-				BattleGUI battle_gui(coordinator, window, &font, background_texture, action_queue,heroes,enemy);
+				BattleGUI battle_gui(coordinator, window, &font, background_texture, action_queue,heroes,enemy,abilities);
 
 				//std::cout << "Battle order: " << std::endl;
 				//for (auto& hero : action_queue)
@@ -310,13 +313,13 @@ public:
 					}
 					
 					//Removing buttons
-					//if (coordinator->GetComponent<Statistics>(*enemy).health <= 0)
-					//	battle_gui.kill(0);
-					//for (auto& e : e_team.team)
-					//{
-					//	if (coordinator->GetComponent<Statistics>(heroes->at(e)).health <= 0)
-					//		battle_gui.kill(e);
-					//}
+					if (coordinator->GetComponent<Statistics>(*enemy).health <= 0)
+						battle_gui.enemy_ptr.at(0)->disable();
+					for (auto& e : e_team.team)
+					{
+						if (coordinator->GetComponent<Statistics>(heroes->at(e)).health <= 0)
+							battle_gui.enemy_ptr.at(e)->disable();
+					}
 
 					//Fight ending
 					bool enemy_alive = false;
@@ -340,7 +343,7 @@ public:
 					}
 					
 					//GUI Update
-					battle_gui.update(mousePosWiew,h_stats.name,h_sprite.sprite.getGlobalBounds(),h_stats.flag);
+					battle_gui.update(mousePosWiew,h_stats.name,h_sprite.sprite.getGlobalBounds(),h_stats.flag,h_stats.abilities);
 					
 					//Coordinator system update
 

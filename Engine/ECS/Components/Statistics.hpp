@@ -20,7 +20,8 @@ struct Statistics
 	int resistance;
 	
 	std::string flag;
+
+	std::vector<int> abilities;
 	
 	bool alive = true;
-	
 };

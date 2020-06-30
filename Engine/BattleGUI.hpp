@@ -42,6 +42,7 @@ class BattleGUI
 	std::list<Entity*> heroes_list;
 	std::vector<StatisticGUI> heroes_stats;
 	std::map<int, Entity>* all_heroes;
+	std::map<int, Ability>* all_abilities;
 	Entity* enemy;
 
 
@@ -53,16 +54,17 @@ public:
 	Button* item;
 	Button* limit;
 	std::map<int, Button*> enemy_ptr;
+	std::vector<Button*> ability_ptr;
 
 	bool isAttacking = false;
-
+	bool choosingAbility = false;
+	bool usingAbility = false;
 	
 	
-	BattleGUI(Coordinator* coordinator,sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites, std::map<int, Entity>* heroes, Entity* ene);
+	BattleGUI(Coordinator* coordinator,sf::RenderWindow* window, sf::Font* f,sf::Texture& background_tex, std::list<Entity*> entites, std::map<int, Entity>* heroes, Entity* ene, std::map<int, Ability>* all_abs);
 	
-	void update(sf::Vector2f mousePos, std::string current_name, sf::FloatRect origin,std::string flag);
+	void update(sf::Vector2f mousePos, std::string current_name, sf::FloatRect origin,std::string flag, std::vector<int> abilities_IDs);
 	void render(sf::RenderWindow* window);
 
-	void kill(int ID);
 };
 

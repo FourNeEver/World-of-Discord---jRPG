@@ -107,7 +107,7 @@ void GameState::ECSinit()
 	cardinal.AddComponent(player, Physical{ sf::Vector2f(0,0),10.f,5.0f,200.f,sf::Vector2f(0,0),true });
 	cardinal.AddComponent(player, Animated{ "IDLE","Resources/Animations/player.animate" });
 	cardinal.AddComponent(player, Collider{ "PLAYER",32,64,sf::Vector2f(0,32) });
-	cardinal.AddComponent(player, Statistics{ "Player","Human",1,0,10,60,60,7,5,10,7,6,"ALLY" });
+	cardinal.AddComponent(player, Statistics{ "Player","Human",1,0,10,60,60,7,5,10,7,6,"ALLY",{1,2,3} });
 	cardinal.AddComponent(player, Team{ {1,2,3} });
 	cardinal.AddComponent(player, GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(player).sprite.getGlobalBounds(),sf::Vector2f(10,0), cardinal.GetComponent<Statistics>(player).max_health, cardinal.GetComponent<Statistics>(player).health,true) });
 	
@@ -148,8 +148,11 @@ void GameState::ECSinit()
 
 void GameState::initialize()
 {
+	sf::Clock loading;
 	view.setSize(sf::Vector2f(1280, 720));
 
+
+	//Initializing keybinds
 	std::ifstream ifs("Config/gamestate_keybinds.ini");
 	if (ifs.is_open())
 	{
@@ -163,6 +166,7 @@ void GameState::initialize()
 
 	ifs.close();
 
+	//Initializing textures
 	if (!textures["PLAYER_SHEET"].loadFromFile("Resources/Sprites/Characters/Knight.png"))
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_CHARACTER_TEXTURE";
 
@@ -183,12 +187,108 @@ void GameState::initialize()
 	if (!textures["GRASS"].loadFromFile("Resources/Map/Pixel GRASS 64.png"))
 		throw"ERROR::GAME_STATE::COULD_NOT_LOAD_TILESET";
 
-
+	//Initializng abilities
+	std::ifstream abilities("Config/abilities.ini");
+	if (abilities.is_open())
+	{
+		int ID = 0;
+		std::string line;
+		abilities.ignore(255, ' ');
+		while (std::getline(abilities, line))
+		{
+			std::cout << line << std::endl;
+			ID = stoi(line);
+			all_abilities.try_emplace(ID);
+			abilities.ignore(255, ' ');
+			std::getline(abilities, line);
+			all_abilities.at(ID).name = line;
+			abilities.ignore(255, ' ');
+			std::getline(abilities, line);
+			all_abilities.at(ID).target = line;
+			abilities.ignore(255, ' ');
+			std::getline(abilities, line);
+			int e = stoi(line);
+			for(unsigned int i = 0;i<e;i++)
+			{
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				all_abilities.at(ID).effects.emplace_back();
+				all_abilities.at(ID).effects.back().type = line;
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				all_abilities.at(ID).effects.back().target = line;
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				all_abilities.at(ID).effects.back().duration = stoi(line);
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				all_abilities.at(ID).effects.back().flat_value = stof(line);
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				int m = stoi(line);
+				for(unsigned int j = 0;j<m;j++)
+				{
+					abilities.ignore(255, ' ');
+					std::getline(abilities, line);
+					all_abilities.at(ID).effects.back().modifires.emplace_back();
+					all_abilities.at(ID).effects.back().modifires.back().origin = line;
+					abilities.ignore(255, ' ');
+					std::getline(abilities, line);
+					all_abilities.at(ID).effects.back().modifires.back().statistic = line;
+					abilities.ignore(255, ' ');
+					std::getline(abilities, line);
+					all_abilities.at(ID).effects.back().modifires.back().percent = stof(line);
+				}
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				bool c = stoi(line);
+				if(c)
+				{
+					abilities.ignore(255, ' ');
+					std::getline(abilities, line);
+					all_abilities.at(ID).effects.back().critical.first = stof(line);
+					abilities.ignore(255, ' ');
+					std::getline(abilities, line);
+					all_abilities.at(ID).effects.back().critical.second = stof(line);
+				}
+				else
+				{
+					all_abilities.at(ID).effects.back().critical.first = 1;
+					all_abilities.at(ID).effects.back().critical.second = 0;
+				}
+			}
+			abilities.ignore(255, ' ');
+			std::getline(abilities, line);
+			all_abilities.at(ID).casts = stoi(line);
+			abilities.ignore(255, ' ');
+			std::getline(abilities, line);
+			int c = stoi(line);
+			for(unsigned int i = 0;i<c;i++)
+			{
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				all_abilities.at(ID).costs.emplace_back();
+				all_abilities.at(ID).costs.back().statistic = line;
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				all_abilities.at(ID).costs.back().flat_value = stof(line);
+				abilities.ignore(255, ' ');
+				std::getline(abilities, line);
+				all_abilities.at(ID).costs.back().percent = stof(line);
+				
+			}
+			abilities.ignore(255, ' ');
+			std::getline(abilities, line);
+			all_abilities.at(ID).particle_ID = stoi(line);
+			abilities.ignore(255, ' ');
+		}
+	}
+	abilities.close();
 	
 
 	ECSinit();
 
-
+	std::cout << "Game initialized in " << loading.getElapsedTime().asSeconds() << " seconds" <<std::endl;
 }
 
 GameState::GameState(sf::RenderWindow* window, std::stack<State*>* states, std::map<std::string, int>* supportedKeys)
@@ -219,14 +319,14 @@ void GameState::update(const float& dt)
 	renderer->update(&cardinal);
 	for (auto& e : enemies)
 	{
-		battler->update(&cardinal, &player,&e, window, renderer, animator, &heroes);
+		battler->update(&cardinal, &player,&e, window, renderer, animator, &heroes,&all_abilities);
 	}
 		//animator->reset(&cardinal);
 
 	
 
 	
-	std::cout << cardinal.GetComponent<Animated>(player).currentAnimation << std::endl;
+	//std::cout << cardinal.GetComponent<Animated>(player).currentAnimation << std::endl;
 
 	for (auto& e : enemies)
 	{
