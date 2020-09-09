@@ -151,6 +151,7 @@ void GameState::initialize()
 	sf::Clock loading;
 	view.setSize(sf::Vector2f(1280, 720));
 
+	pause = new Pause(false, *window);
 
 	//Initializing keybinds
 	std::ifstream ifs("Config/gamestate_keybinds.ini");
@@ -304,39 +305,51 @@ GameState::~GameState()
 
 void GameState::update(const float& dt)
 {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds.at("CLOSE"))))
+	if (!pause->isPaused())
 	{
-		exit();
-		window->setView(sf::View(sf::FloatRect(0, 0, 1280, 720)));
-	}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds.at("CLOSE"))))
+		{
 
-	collider->collide(&cardinal, &player);
-	
-	collider->update(&cardinal);
-	controler->update(&cardinal, &keybinds);
-	physics->update(&cardinal, dt);
-	animator->update(&cardinal, dt);
-	renderer->update(&cardinal);
-	for (auto& e : enemies)
-	{
-		battler->update(&cardinal, &player,&e, window, renderer, animator, &heroes,&all_abilities);
-	}
+			pause->pause();
+
+		}
+
+
+		collider->collide(&cardinal, &player);
+
+		collider->update(&cardinal);
+		controler->update(&cardinal, &keybinds);
+		physics->update(&cardinal, dt);
+		animator->update(&cardinal, dt);
+		renderer->update(&cardinal);
+		for (auto& e : enemies)
+		{
+			battler->update(&cardinal, &player, &e, window, renderer, animator, &heroes, &all_abilities);
+		}
 		//animator->reset(&cardinal);
 
-	
 
-	
+
+
 	//std::cout << cardinal.GetComponent<Animated>(player).currentAnimation << std::endl;
 
-	for (auto& e : enemies)
-	{
-		if (!cardinal.GetComponent<Statistics>(e).alive)
+		for (auto& e : enemies)
 		{
-			cardinal.DestroyEntity(e);
-			enemies.clear();
+			if (!cardinal.GetComponent<Statistics>(e).alive)
+			{
+				cardinal.DestroyEntity(e);
+				enemies.clear();
+			}
 		}
 	}
-
+	else
+	{
+		pause->update(dt);
+		if (pause->isExiting())
+		{
+			exit();
+		}
+	}
 }
 
 
@@ -345,14 +358,25 @@ void GameState::render(sf::RenderTarget* target)
 
 
 	window->clear();
+	if (!pause->isPaused())
+	{
+		renderer->render(&cardinal, window);
 
-	renderer->render(&cardinal, window);
 
-	////*Debug* shows hitboxes
-	//collider->render(&cardinal, window);
+		////*Debug* shows hitboxes
+		//collider->render(&cardinal, window);
 
-	view.setCenter(cardinal.GetComponent<Transform>(player).position);
-	window->setView(view);
+		view.setCenter(cardinal.GetComponent<Transform>(player).position);
+		window->setView(view);
+
+	}
+	else
+	{
+		pause->render(*window);
+		window->setView(sf::View(sf::FloatRect(0, 0, 1280, 720)));
+	}
+	
+	
 
 
 }

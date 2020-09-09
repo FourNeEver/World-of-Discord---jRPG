@@ -2,6 +2,7 @@
 
 #include "State.hpp"
 #include "../ECS/ECS.hpp"
+#include "../Pause.hpp"
 
 class GameState : public State
 {
@@ -22,7 +23,8 @@ private:
 
 	void ECSinit();
 	void initialize();
-
+	Pause *pause;
+	
 public:
 	Entity player;
 	std::map<int, Entity> heroes;

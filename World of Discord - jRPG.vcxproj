@@ -188,6 +188,7 @@
     <ClInclude Include="Engine\ECS\Systems\RenderSystem.hpp" />
     <ClInclude Include="Engine\Game.hpp" />
     <ClInclude Include="Engine\Libraries.hpp" />
+    <ClInclude Include="Engine\Pause.hpp" />
     <ClInclude Include="Engine\States\State.hpp" />
     <ClInclude Include="Engine\States\MainMenuState.hpp" />
     <ClInclude Include="Engine\States\GameState.hpp" />

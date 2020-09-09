@@ -1,4 +1,3 @@
-#include <iostream>
 
 #include "ECS/ECS.hpp"
 #include "Game.hpp"
@@ -18,7 +17,6 @@ int main()
     }
 	
     delete game;
-
 	
 	return 0;
 }
