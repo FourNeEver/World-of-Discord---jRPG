@@ -12,6 +12,7 @@ void GameState::ECSinit()
 	cardinal.RegisterComponent<Statistics>();
 	cardinal.RegisterComponent<Team>();
 	cardinal.RegisterComponent<GUI>();
+	cardinal.RegisterComponent<Combat>();
 
 	renderer = cardinal.RegisterSystem<RenderSystem>();
 	{
@@ -57,6 +58,7 @@ void GameState::ECSinit()
 		signature.set(cardinal.GetComponentType<Sprite>());
 		signature.set(cardinal.GetComponentType<Team>());
 		signature.set(cardinal.GetComponentType<GUI>());
+		signature.set(cardinal.GetComponentType<Combat>());
 		cardinal.SetSystemSignature<BattleSystem>(signature);
 	}
 
@@ -101,6 +103,7 @@ void GameState::ECSinit()
 		}
 	}
 
+	//Creating Player Entity
 	player = cardinal.CreateEntity();
 	cardinal.AddComponent(player, Transform{ sf::Vector2f(100,100),0,sf::Vector2f(2,2) });
 	cardinal.AddComponent(player, Sprite{ textures["PLAYER_SHEET"] ,sf::IntRect(0, 0, 32, 32),true });
@@ -110,7 +113,9 @@ void GameState::ECSinit()
 	cardinal.AddComponent(player, Statistics{ "Player","Human",1,0,10,60,60,7,5,10,7,6,"ALLY",{1,2,3} });
 	cardinal.AddComponent(player, Team{ {1,2,3} });
 	cardinal.AddComponent(player, GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(player).sprite.getGlobalBounds(),sf::Vector2f(10,0), cardinal.GetComponent<Statistics>(player).max_health, cardinal.GetComponent<Statistics>(player).health,true) });
-	
+	cardinal.AddComponent(player, Combat{false});
+
+	//Generating heroes
 	std::ifstream hero_file("Resources/Heroes/config.hero");
 	if(hero_file.is_open())
 	{
@@ -127,7 +132,7 @@ void GameState::ECSinit()
 		}
 	}
 
-	
+	//Generating enemies
 	enemies.emplace_back(cardinal.CreateEntity());
 	cardinal.AddComponent(enemies.front(), Transform{ sf::Vector2f(200,200),0,sf::Vector2f(2,2) });
 	cardinal.AddComponent(enemies.front(), Sprite{ textures["ENEMY_SHEET"] , sf::IntRect(0, 0, 32, 32),true });
@@ -136,7 +141,9 @@ void GameState::ECSinit()
 	cardinal.AddComponent(enemies.front(), Statistics{ "Enemy","Human",1,0,0,40,40,5,3,6,4,3,"ENEMY" });
 	cardinal.AddComponent(enemies.front(), Team{ {4} });
 	cardinal.AddComponent(enemies.front(), GUI{ Bar(sf::Color::Green, sf::Color::Red, sf::Vector2f(5, 64), cardinal.GetComponent<Sprite>(enemies.front()).sprite.getGlobalBounds(),sf::Vector2f(-cardinal.GetComponent<Sprite>(enemies.front()).sprite.getGlobalBounds().width - 5,0), cardinal.GetComponent<Statistics>(enemies.front()).max_health, cardinal.GetComponent<Statistics>(enemies.front()).health,true) });
-	
+	cardinal.AddComponent(enemies.front(), Combat{ false });
+
+	//Systems initialization
 	renderer->init(&cardinal);
 	animator->init(&cardinal);
 	collider->init(&cardinal);
@@ -305,6 +312,7 @@ GameState::~GameState()
 
 void GameState::update(const float& dt)
 {
+	//Game Running
 	if (!pause->isPaused())
 	{
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key(keybinds.at("CLOSE"))))
@@ -314,20 +322,46 @@ void GameState::update(const float& dt)
 
 		}
 
-
-		collider->collide(&cardinal, &player);
-
-		collider->update(&cardinal);
-		controler->update(&cardinal, &keybinds);
-		physics->update(&cardinal, dt);
-		animator->update(&cardinal, dt);
-		renderer->update(&cardinal);
-		for (auto& e : enemies)
+		if (!cardinal.GetComponent<Combat>(player).in_combat)
 		{
-			battler->update(&cardinal, &player, &e, window, renderer, animator, &heroes, &all_abilities);
-		}
-		//animator->reset(&cardinal);
+			collider->collide(&cardinal, &player);
 
+			collider->update(&cardinal);
+			controler->update(&cardinal, &keybinds);
+			physics->update(&cardinal, dt);
+			animator->update(&cardinal, dt);
+			renderer->update(&cardinal);
+			//for (auto& e : enemies)
+			//{
+			//	battler->update(&cardinal, &player, &e, window, renderer, animator, &heroes, &all_abilities);
+			//}
+			//animator->reset(&cardinal);
+			for (std::vector<Entity>::size_type i=0; i!=enemies.size();i++)
+			{
+				battler->aggro_check(&cardinal, &enemies.at(i));
+				if (cardinal.GetComponent<Combat>(enemies.at(i)).in_combat)
+				{
+					cardinal.GetComponent<Combat>(player).opponent_ID = i;
+					cardinal.GetComponent<Combat>(player).in_combat = true;
+
+				}
+				else
+				{
+					cardinal.GetComponent<Combat>(player).opponent_ID = NULL;
+					cardinal.GetComponent<Combat>(player).in_combat = false;
+				}
+			}
+		}
+
+		if(cardinal.GetComponent<Combat>(player).in_combat)
+		{
+			if(!cardinal.GetComponent<Combat>(player).is_initialized)
+			{
+				battler->initialize_battle(&cardinal,&player,&enemies.at(cardinal.GetComponent<Combat>(player).opponent_ID),&heroes,&all_abilities,&living);
+			}
+			battler->update()
+		}
+		//std::cout << cardinal.GetComponent<Combat>(player).opponent_ID << std::endl;
 
 
 
@@ -342,6 +376,7 @@ void GameState::update(const float& dt)
 			}
 		}
 	}
+	//Game paused
 	else
 	{
 		pause->update(dt);

@@ -142,75 +142,6 @@ public:
 			GUI_background.setOutlineColor(sf::Color::Black);
 			GUI_background.setOutlineThickness(1);
 
-			//Saving previous position
-			auto p_transform_copy = coordinator->GetComponent<Transform>(*player);
-			auto e_transform_copy = coordinator->GetComponent<Transform>(*enemy);
-
-			//Player team init
-			p_animation.currentAnimation = "IDLE_SIDE";
-			p_transform.position = sf::Vector2f(1100, 450);
-			int place = 1;
-
-			for (auto& t : p_team.team)
-			{
-				coordinator->GetComponent<Sprite>(heroes->at(t)).isVisible = true;
-				if (!(place % 2))
-					coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(p_transform.position.x, p_transform.position.y - (50 * place));
-				else
-					coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(p_transform.position.x - 70, p_transform.position.y - (50 * place));
-				std::cout << coordinator->GetComponent<Statistics>(heroes->at(t)).name << std::endl;
-				place++;
-			}
-
-			//Enemy team init
-			e_animation.currentAnimation = "IDLE_SIDE";
-			e_transform.position = sf::Vector2f(200, 400);
-
-			place = 1;
-			for (auto& t : e_team.team)
-			{
-				coordinator->GetComponent<Sprite>(heroes->at(t)).isVisible = true;
-				if (!(place % 2))
-					coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(e_transform.position.x, e_transform.position.y - (50 * place));
-				else
-					coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(e_transform.position.x - 70, e_transform.position.y - (50 * place));
-				coordinator->GetComponent<Statistics>(heroes->at(t)).flag = "ENEMY";
-				std::cout << coordinator->GetComponent<Statistics>(heroes->at(t)).name << std::endl;
-				place++;
-			}
-
-			//Renderer update
-			renderer->update(coordinator);
-
-
-			//GUI update
-			p_GUI.health_bar.update_origin(p_sprite.sprite.getGlobalBounds());
-			e_GUI.health_bar.update_origin(e_sprite.sprite.getGlobalBounds());
-
-			for (auto& t : p_team.team)
-			{
-				coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update_origin(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite.getGlobalBounds());
-			}
-
-			for (auto& t : e_team.team)
-			{
-				coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update_origin(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite.getGlobalBounds());
-			}
-			
-			std::list<Entity*> living;
-			living.emplace_back(player);
-			living.emplace_back(enemy);
-			for (auto& t : p_team.team)
-			{
-				living.emplace_back(&heroes->at(t));
-			}
-			for (auto& t : e_team.team)
-			{
-				living.emplace_back(&heroes->at(t));
-			}
-
-			std::cout << "Battle initialized in " << loading.getElapsedTime().asSeconds() << " seconds" << std::endl;
-			
 			//Fight loop
 			while (fighting)
 			{
@@ -403,5 +334,117 @@ public:
 		}
 		/*}*/
 		
+	}
+
+	void aggro_check(Coordinator* coordinator, Entity* enemy)
+	{
+
+		auto& e_collider = coordinator->GetComponent<Collider>(*enemy);
+		auto& e_combat = coordinator->GetComponent<Combat>(*enemy);
+
+
+		if(e_collider.colliding.at("ACTION"))
+		{
+			e_combat.in_combat = true;
+		}
+		else
+		{
+			e_combat.in_combat = false;
+		}
+	}
+
+	void initialize_battle(Coordinator* coordinator, Entity* player,Entity* enemy, std::map<int, Entity>* heroes, std::map<int, Ability>* abilities, std::list<Entity*>* living)
+	{
+
+		auto& p_stats = coordinator->GetComponent<Statistics>(*player);
+		auto& p_physics = coordinator->GetComponent<Physical>(*player);
+		auto& p_animation = coordinator->GetComponent<Animated>(*player);
+		auto& p_transform = coordinator->GetComponent<Transform>(*player);
+		auto& p_sprite = coordinator->GetComponent<Sprite>(*player);
+		auto& p_team = coordinator->GetComponent<Team>(*player);
+		auto& p_GUI = coordinator->GetComponent<GUI>(*player);
+		auto& p_combat = coordinator->GetComponent<Combat>(*player);
+
+		//Enemy components
+		auto& e_transform = coordinator->GetComponent<Transform>(*enemy);
+		auto& e_stats = coordinator->GetComponent<Statistics>(*enemy);
+		auto& e_sprite = coordinator->GetComponent<Sprite>(*enemy);
+		auto& e_collider = coordinator->GetComponent<Collider>(*enemy);
+		auto& e_animation = coordinator->GetComponent<Animated>(*enemy);
+		auto& e_team = coordinator->GetComponent<Team>(*enemy);
+		auto& e_GUI = coordinator->GetComponent<GUI>(*enemy);
+		auto& e_combat = coordinator->GetComponent<Combat>(*enemy);
+
+		
+		//Saving previous position
+		p_combat.pre_battle_position = coordinator->GetComponent<Transform>(*player).position;
+		e_combat.pre_battle_position = coordinator->GetComponent<Transform>(coordinator->GetComponent<Combat>(*player).opponent_ID).position;
+
+		//Player team init
+		p_animation.currentAnimation = "IDLE_SIDE";
+		p_transform.position = sf::Vector2f(1100, 450);
+		int place = 1;
+
+		for (auto& t : p_team.team)
+		{
+			coordinator->GetComponent<Sprite>(heroes->at(t)).isVisible = true;
+			if (!(place % 2))
+				coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(p_transform.position.x, p_transform.position.y - (50 * place));
+			else
+				coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(p_transform.position.x - 70, p_transform.position.y - (50 * place));
+			std::cout << coordinator->GetComponent<Statistics>(heroes->at(t)).name << std::endl;
+			place++;
+		}
+
+		//Enemy team init
+		e_animation.currentAnimation = "IDLE_SIDE";
+		e_transform.position = sf::Vector2f(200, 400);
+
+		place = 1;
+		for (auto& t : e_team.team)
+		{
+			coordinator->GetComponent<Sprite>(heroes->at(t)).isVisible = true;
+			if (!(place % 2))
+				coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(e_transform.position.x, e_transform.position.y - (50 * place));
+			else
+				coordinator->GetComponent<Transform>(heroes->at(t)).position = sf::Vector2f(e_transform.position.x - 70, e_transform.position.y - (50 * place));
+			coordinator->GetComponent<Statistics>(heroes->at(t)).flag = "ENEMY";
+			std::cout << coordinator->GetComponent<Statistics>(heroes->at(t)).name << std::endl;
+			place++;
+		}
+
+		living->emplace_back(player);
+		living->emplace_back(enemy);
+		for (auto& t : p_team.team)
+		{
+			living->emplace_back(&heroes->at(t));
+		}
+		for (auto& t : e_team.team)
+		{
+			living->emplace_back(&heroes->at(t));
+		}
+		
+		//Renderer update
+		//renderer->update(coordinator);
+
+
+		//GUI update
+		p_GUI.health_bar.update_origin(p_sprite.sprite.getGlobalBounds());
+		e_GUI.health_bar.update_origin(e_sprite.sprite.getGlobalBounds());
+
+		for (auto& t : p_team.team)
+		{
+			coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update_origin(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite.getGlobalBounds());
+		}
+
+		for (auto& t : e_team.team)
+		{
+			coordinator->GetComponent<GUI>(heroes->at(t)).health_bar.update_origin(coordinator->GetComponent<Sprite>(heroes->at(t)).sprite.getGlobalBounds());
+		}
+
+
+
+		//std::cout << "Battle initialized in " << loading.getElapsedTime().asSeconds() << " seconds" << std::endl;
+
 	}
 };

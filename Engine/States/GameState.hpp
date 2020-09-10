@@ -17,6 +17,7 @@ private:
 	std::shared_ptr<AnimationSystem> animator;
 	std::shared_ptr<CollisionSystem> collider;
 	std::shared_ptr<BattleSystem> battler;
+	std::list<Entity*> living;
 
 	std::map<std::string, sf::Texture> textures;
 	std::map<int, Ability> all_abilities;

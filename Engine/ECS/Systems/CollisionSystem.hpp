@@ -90,8 +90,12 @@ public:
 				{
 					if (p_collider.hitbox.intersects(collider.hitbox))
 					{
-						std::cout << "Collision" << std::endl;
+						//std::cout << "Collision" << std::endl;
 						collider.colliding.at("ACTION") = true;
+					}
+					else
+					{
+						collider.colliding.at("ACTION") = false;
 					}
 					
 					

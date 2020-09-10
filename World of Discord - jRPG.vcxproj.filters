@@ -143,5 +143,8 @@
     <ClInclude Include="Engine\Pause.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\ECS\Components\Combat.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

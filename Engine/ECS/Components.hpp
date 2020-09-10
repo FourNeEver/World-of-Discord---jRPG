@@ -8,3 +8,4 @@
 #include "Components/Statistics.hpp"
 #include "Components/Team.hpp"
 #include "Components/GUI.hpp"
+#include "Components/Combat.hpp"

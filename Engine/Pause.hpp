@@ -61,7 +61,7 @@ inline Pause::Pause(bool isPaused, sf::RenderWindow& window) : pause_(isPaused),
 		sf::Color(20, 20, 20, 0));
 
 
-	buttons["EXIT"] = new Button(1100.f, 400.f, 150.f, 50.f, &font, "Quit",
+	buttons["EXIT"] = new Button(1100.f, 400.f, 150.f, 50.f, &font, "Main menu",
 		30,
 		sf::Color(70, 70, 70, 200),
 		sf::Color(150, 150, 150, 255),
