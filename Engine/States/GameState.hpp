@@ -17,14 +17,21 @@ private:
 	std::shared_ptr<AnimationSystem> animator;
 	std::shared_ptr<CollisionSystem> collider;
 	std::shared_ptr<BattleSystem> battler;
+	
 	std::list<Entity*> living;
+	std::list<Entity*>::iterator current_hero;
+	std::list<Entity*> action_queue;
+	BattleGUI* battle_gui;
+	bool action_avaible;
 
 	std::map<std::string, sf::Texture> textures;
 	std::map<int, Ability> all_abilities;
 
+	bool fighting = false;
+	
 	void ECSinit();
 	void initialize();
-	Pause *pause;
+	Pause* pause;
 	
 public:
 	Entity player;

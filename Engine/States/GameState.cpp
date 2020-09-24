@@ -357,9 +357,10 @@ void GameState::update(const float& dt)
 		{
 			if(!cardinal.GetComponent<Combat>(player).is_initialized)
 			{
-				battler->initialize_battle(&cardinal,&player,&enemies.at(cardinal.GetComponent<Combat>(player).opponent_ID),&heroes,&all_abilities,&living);
+				battler->initialize_battle(&cardinal,&player,&enemies.at(cardinal.GetComponent<Combat>(player).opponent_ID),&heroes,&all_abilities,&living,fighting,window,font,background_texture,action_queue);
+				battle_gui =  new BattleGUI(&cardinal, window, font, *background_texture, action_queue, heroes, &enemies.at(cardinal.GetComponent<Combat>(player).opponent_ID), player, &all_abilities);
 			}
-			battler->update()
+			battler->update();
 		}
 		//std::cout << cardinal.GetComponent<Combat>(player).opponent_ID << std::endl;
 
