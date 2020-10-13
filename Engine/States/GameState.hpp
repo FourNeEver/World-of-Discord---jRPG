@@ -2,6 +2,7 @@
 
 #include "State.hpp"
 #include "../ECS/ECS.hpp"
+#include "../Battle.hpp"
 #include "../Pause.hpp"
 
 class GameState : public State
@@ -17,12 +18,6 @@ private:
 	std::shared_ptr<AnimationSystem> animator;
 	std::shared_ptr<CollisionSystem> collider;
 	std::shared_ptr<BattleSystem> battler;
-	
-	std::list<Entity*> living;
-	std::list<Entity*>::iterator current_hero;
-	std::list<Entity*> action_queue;
-	BattleGUI* battle_gui;
-	bool action_avaible;
 
 	std::map<std::string, sf::Texture> textures;
 	std::map<int, Ability> all_abilities;
@@ -32,6 +27,7 @@ private:
 	void ECSinit();
 	void initialize();
 	Pause* pause;
+	Battle* battle;
 	
 public:
 	Entity player;

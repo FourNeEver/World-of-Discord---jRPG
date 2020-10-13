@@ -163,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Bar.hpp" />
+    <ClInclude Include="Engine\Battle.hpp" />
     <ClInclude Include="Engine\Button.hpp" />
     <ClInclude Include="Engine\ECS\Components.hpp" />
     <ClInclude Include="Engine\Animation.hpp" />

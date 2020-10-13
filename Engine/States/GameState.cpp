@@ -336,6 +336,7 @@ void GameState::update(const float& dt)
 			//	battler->update(&cardinal, &player, &e, window, renderer, animator, &heroes, &all_abilities);
 			//}
 			//animator->reset(&cardinal);
+			
 			for (std::vector<Entity>::size_type i=0; i!=enemies.size();i++)
 			{
 				battler->aggro_check(&cardinal, &enemies.at(i));
@@ -357,10 +358,9 @@ void GameState::update(const float& dt)
 		{
 			if(!cardinal.GetComponent<Combat>(player).is_initialized)
 			{
-				battler->initialize_battle(&cardinal,&player,&enemies.at(cardinal.GetComponent<Combat>(player).opponent_ID),&heroes,&all_abilities,&living,fighting,window,font,background_texture,action_queue);
-				battle_gui =  new BattleGUI(&cardinal, window, font, *background_texture, action_queue, heroes, &enemies.at(cardinal.GetComponent<Combat>(player).opponent_ID), player, &all_abilities);
+				battle = new Battle(&cardinal, &player, &enemies.at(cardinal.GetComponent<Combat>(player).opponent_ID), battler, renderer,animator, window, &enemies, &heroes, &all_abilities);
 			}
-			battler->update();
+			battle->battle();
 		}
 		//std::cout << cardinal.GetComponent<Combat>(player).opponent_ID << std::endl;
 
